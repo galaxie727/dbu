@@ -16,7 +16,6 @@
 
   --footer-h: 140px;
   --deka-w: 260px;
-  --deka-gap: 14px;
 }
 
 *{box-sizing:border-box}
@@ -92,6 +91,7 @@ main{
   margin-top:20px;
   font-size:14px;
   color:#999;
+  min-height:1.6em;
 }
 
 footer{
@@ -104,7 +104,6 @@ footer{
 }
 
 button{
-  appearance:none;
   border:1px solid var(--line);
   background:#fafafa;
   border-radius:18px;
@@ -113,20 +112,28 @@ button{
   cursor:pointer;
 }
 
-button:active{background:#f0f0f0}
-
 footer.locked button{
   opacity:.35;
   pointer-events:none;
 }
 
-.dekabusa{
+.character{
   position:absolute;
-  right:var(--deka-gap);
+  right:14px;
   bottom:var(--footer-h);
   width:var(--deka-w);
   pointer-events:none;
 }
+
+.dim{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.25);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+}
+.dim.show{opacity:1}
 </style>
 </head>
 
@@ -139,76 +146,31 @@ footer.locked button{
     <div class="dot"></div>
     <h1>デカブサ占い</h1>
   </div>
-  <div id="quota">今日はあと3回</div>
+  <div id="quota"></div>
 </header>
 
 <main>
-  <div id="text">読み込み中</div>
+  <div id="text"></div>
   <div id="sub"></div>
 </main>
 
 <footer id="choices" class="locked"></footer>
 
-<img src="dekabusa.png" class="dekabusa" alt="デカブサ">
+<img id="charaImg" class="character" src="dekabusa.png">
+<div id="dim" class="dim"></div>
+
+<audio id="clap" src="clap.mp3" preload="auto"></audio>
 
 </div>
 </div>
 
 <script>
-// ================= 設定 =================
+// ===== 回数制限 =====
 const DAILY_LIMIT = 3;
 const KEY_DATE="dekabusa_date";
 const KEY_COUNT="dekabusa_count";
-
-// ================= 質問データ =================
-const FLOW = [
-  {
-    q:"朝の気分は？",
-    a:[
-      {t:"最強", d:2, b:0},
-      {t:"普通", d:1, b:1},
-      {t:"だるい", d:0, b:2},
-      {t:"無", d:0, b:1}
-    ]
-  },
-  {
-    q:"服装の方向性",
-    a:[
-      {t:"デカい", d:2, b:0},
-      {t:"清潔", d:0, b:-1},
-      {t:"ヨレ", d:0, b:2},
-      {t:"気にしない", d:0, b:1}
-    ]
-  },
-  {
-    q:"誘われたら？",
-    a:[
-      {t:"即行く", d:2, b:0},
-      {t:"様子見", d:1, b:1},
-      {t:"既読無視", d:0, b:2},
-      {t:"断る", d:0, b:1}
-    ]
-  }
-];
-
-// ================= 結果 =================
-function judge(d,b){
-  if(d>=5 && b<=1) return "覇王デカ\n\n今日は前に出てOK";
-  if(d>=4 && b>=4) return "暴君デカブサ\n\n近づきすぎ注意";
-  if(b>=5) return "闇ブサ\n\n今日は静かに";
-  return "バランス型\n\n無理しない日";
-}
-
-// ================= 状態 =================
-let step=-1;
-let deka=0;
-let busa=0;
-
-// ================= util =================
-function today(){
-  return new Date().toLocaleDateString("ja-JP");
-}
-function load(){
+const today=()=>new Date().toLocaleDateString("ja-JP");
+function loadCount(){
   if(localStorage.getItem(KEY_DATE)!==today()){
     localStorage.setItem(KEY_DATE,today());
     localStorage.setItem(KEY_COUNT,"0");
@@ -216,50 +178,105 @@ function load(){
   return Number(localStorage.getItem(KEY_COUNT)||0);
 }
 function consume(){
-  const c=load();
+  const c=loadCount();
   if(c>=DAILY_LIMIT) return false;
   localStorage.setItem(KEY_COUNT,c+1);
   return true;
 }
 function updateQuota(){
-  const r=Math.max(0,DAILY_LIMIT-load());
+  const r=Math.max(0,DAILY_LIMIT-loadCount());
   quota.textContent=r?`今日はあと${r}回`:"今日はもう終わりです";
 }
 
-// ================= 表示 =================
+// ===== イントロ =====
+const introText = Math.random()<0.05
+? "あなたの運勢はどう？\n\n2%の人が\n当たったと解答"
+: "あなたの運勢はどう？\n\n98%の人が\n外れたと解答";
+
+// ===== 質問 =====
+const QUESTIONS = Array.from({length:7},(_,i)=>({
+  q:`質問 ${i+1}`,
+  a:["はい","どちらでも","微妙","いいえ"]
+}));
+
+// ===== キャラ =====
+const CHARACTERS = [
+  {name:"dekabusa", img:"dekabusa.png", rate:75, lines:["まあ、そうだな","無理すんな","続けよう"]},
+  {name:"namaken", img:"namaken.png", rate:10, lines:["あとでいい","急ぐな"]},
+  {name:"kanemon", img:"kanemon.png", rate:10, lines:["まあ入る","持っとくか"]},
+  {name:"lion", img:"lionmaru.png", rate:5, special:true}
+];
+
+function pickChar(){
+  let r=Math.random()*100;
+  for(const c of CHARACTERS){
+    if((r-=c.rate)<0) return c;
+  }
+  return CHARACTERS[0];
+}
+
+// ===== DOM =====
 const text=document.getElementById("text");
 const sub=document.getElementById("sub");
 const footer=document.getElementById("choices");
 const quota=document.getElementById("quota");
+const chara=document.getElementById("charaImg");
+const dim=document.getElementById("dim");
+const clap=document.getElementById("clap");
 
+let step=-1;
+
+// ===== 表示 =====
 function showIntro(){
-  step=-1;
-  deka=0; busa=0;
-  text.textContent="タップして\n占い開始";
-  sub.textContent="";
+  updateQuota();
+  text.textContent=introText;
+  sub.textContent="タップして";
   footer.classList.add("locked");
 }
 
 function showQuestion(){
   step++;
-  if(step>=FLOW.length){ showResult(); return; }
+  if(step>=QUESTIONS.length){ showResult(); return; }
 
-  const q=FLOW[step];
+  const q=QUESTIONS[step];
   text.textContent=q.q;
-  sub.textContent=`${step+1} / ${FLOW.length}`;
+  sub.textContent="";
   footer.innerHTML="";
   footer.classList.remove("locked");
 
-  q.a.forEach(o=>{
+  q.a.forEach(t=>{
     const b=document.createElement("button");
-    b.textContent=o.t;
-    b.onclick=()=>{
-      deka+=o.d;
-      busa+=o.b;
-      showQuestion();
-    };
+    b.textContent=t;
+    b.onclick=()=>afterAnswer();
     footer.appendChild(b);
   });
+}
+
+function afterAnswer(){
+  footer.classList.add("locked");
+  const c=pickChar();
+
+  chara.src=c.img;
+
+  if(c.special){
+    dim.classList.add("show");
+    text.textContent="ザ・トーマレ！";
+    setTimeout(()=>{
+      text.textContent="ザ・トーマレ！\n時を止めてから拍手";
+      clap.play();
+    },400);
+    setTimeout(()=>{
+      dim.classList.remove("show");
+      chara.src="dekabusa.png";
+      showQuestion();
+    },2000);
+  }else{
+    text.textContent=c.lines[Math.floor(Math.random()*c.lines.length)];
+    setTimeout(()=>{
+      chara.src="dekabusa.png";
+      showQuestion();
+    },600);
+  }
 }
 
 function showResult(){
@@ -269,14 +286,13 @@ function showResult(){
     return;
   }
   updateQuota();
-  text.textContent=judge(deka,busa);
-  sub.textContent="今日はそういう日です";
-  footer.innerHTML="";
+  chara.src="dekabusa.png";
+  text.textContent="結果は\n特に変わりません";
+  sub.textContent="今日は、そういう日だ";
   footer.classList.add("locked");
 }
 
-// ================= 起動 =================
-updateQuota();
+// ===== 起動 =====
 showIntro();
 document.querySelector("main").onclick=()=>{
   if(step===-1) showQuestion();
