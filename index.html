@@ -16,287 +16,475 @@
 
   --footer-h: 140px;
   --deka-w: 260px;
+  --deka-gap: 14px;
+  --text-top-pad: 26px;
 }
 
-*{box-sizing:border-box}
+*{ box-sizing:border-box; }
+
 body{
   margin:0;
-  background:var(--bg);
-  font-family: system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
+               "Noto Sans JP", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .wrap{
-  min-height:100svh;
+  min-height: 100svh;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:18px;
+  padding: 18px;
 }
 
 .card{
-  width:min(680px,100%);
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:14px;
+  width: min(680px, 100%);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
   overflow:hidden;
-  position:relative;
+  position: relative;
 }
 
 header{
-  padding:14px 16px;
-  border-bottom:1px solid var(--line);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content: space-between;
+  gap:10px;
 }
 
 .headLeft{
   display:flex;
   align-items:center;
   gap:10px;
+  min-width: 0;
 }
 
 .dot{
-  width:10px;height:10px;
+  width:10px; height:10px;
   border-radius:50%;
-  background:var(--accent);
+  background: var(--accent);
+  flex: 0 0 auto;
 }
 
 h1{
   font-size:14px;
+  font-weight:700;
   margin:0;
-  color:var(--muted);
   letter-spacing:.08em;
+  color:var(--muted);
+  white-space: nowrap;
 }
 
 #quota{
-  font-size:12px;
-  color:#999;
+  font-size: 12px;
+  color: #9a9a9a;
+  letter-spacing: .08em;
+  white-space: nowrap;
 }
 
 main{
-  padding:26px 18px calc(var(--footer-h) + 18px);
-  min-height:520px;
+  padding: var(--text-top-pad) 18px calc(var(--footer-h) + 18px);
   text-align:center;
+  min-height: 520px;
+  position: relative;
 }
 
 #text{
-  white-space:pre-line;
-  font-size:clamp(28px,4.5vw,36px);
-  line-height:1.55;
-  letter-spacing:.06em;
+  white-space: pre-line;
+  font-size: clamp(28px, 4.6vw, 36px);
+  line-height: 1.55;
+  letter-spacing: .06em;
+  margin: 0;
+  text-align: center;
 }
 
 #sub{
-  margin-top:20px;
-  font-size:14px;
-  color:#999;
-  min-height:1.6em;
+  margin: 20px 0 0;
+  font-size: 14px;
+  color: #9a9a9a;
+  letter-spacing: .08em;
+  min-height: 1.6em;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.9;
 }
 
 footer{
-  border-top:1px solid var(--line);
-  height:var(--footer-h);
+  border-top: 1px solid var(--line);
+  height: var(--footer-h);
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap:12px;
-  padding:14px;
+  justify-content:center;
+  align-items:center;
+  padding: 14px;
 }
 
 button{
+  appearance:none;
   border:1px solid var(--line);
   background:#fafafa;
-  border-radius:18px;
-  font-size:16px;
+  color:#111;
+  border-radius: 18px;
   padding:16px 10px;
+  font-size:16px;
   cursor:pointer;
+  transition: opacity .15s ease;
+}
+
+button:active{
+  transform: translateY(1px);
+  background:#f2f2f2;
 }
 
 footer.locked button{
-  opacity:.35;
-  pointer-events:none;
+  opacity: .35;
+  cursor: default;
+  pointer-events: none;
 }
 
 .character{
   position:absolute;
-  right:14px;
-  bottom:var(--footer-h);
-  width:var(--deka-w);
+  right: var(--deka-gap);
+  bottom: var(--footer-h);
+  width: var(--deka-w);
+  height: auto;
+  opacity: .98;
   pointer-events:none;
+  user-select:none;
 }
 
+/* ライオン丸用：軽い暗転 */
 .dim{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,.25);
+  background: rgba(0,0,0,0.22);
   opacity:0;
   pointer-events:none;
-  transition:.2s;
+  transition: opacity .2s ease;
 }
-.dim.show{opacity:1}
+.dim.show{ opacity:1; }
 </style>
 </head>
 
 <body>
 <div class="wrap">
-<div class="card">
+  <div class="card">
+    <header>
+      <div class="headLeft">
+        <div class="dot"></div>
+        <h1>デカブサ占い</h1>
+      </div>
+      <div id="quota"></div>
+    </header>
 
-<header>
-  <div class="headLeft">
-    <div class="dot"></div>
-    <h1>デカブサ占い</h1>
+    <main id="main">
+      <p id="text">読み込み中</p>
+      <p id="sub"></p>
+    </main>
+
+    <footer id="choices" class="locked"></footer>
+
+    <img id="charaImg" class="character" src="dekabusa.png" alt="character">
+    <div id="dim" class="dim"></div>
+
+    <audio id="clap" src="clap.mp3" preload="auto"></audio>
   </div>
-  <div id="quota"></div>
-</header>
-
-<main>
-  <div id="text"></div>
-  <div id="sub"></div>
-</main>
-
-<footer id="choices" class="locked"></footer>
-
-<img id="charaImg" class="character" src="dekabusa.png">
-<div id="dim" class="dim"></div>
-
-<audio id="clap" src="clap.mp3" preload="auto"></audio>
-
-</div>
 </div>
 
 <script>
-// ===== 回数制限 =====
+/* =====================
+   デバッグ（?debug=1）
+===================== */
+const params = new URLSearchParams(location.search);
+const IS_DEBUG = params.get("debug") === "1";
+
+/* =====================
+   回数制限（1日3回）
+   ※debug=1 は無制限
+===================== */
 const DAILY_LIMIT = 3;
 const KEY_DATE="dekabusa_date";
 const KEY_COUNT="dekabusa_count";
-const today=()=>new Date().toLocaleDateString("ja-JP");
-function loadCount(){
-  if(localStorage.getItem(KEY_DATE)!==today()){
-    localStorage.setItem(KEY_DATE,today());
-    localStorage.setItem(KEY_COUNT,"0");
-  }
-  return Number(localStorage.getItem(KEY_COUNT)||0);
+
+function todayKey(){
+  return new Date().toLocaleDateString("ja-JP");
 }
-function consume(){
-  const c=loadCount();
-  if(c>=DAILY_LIMIT) return false;
-  localStorage.setItem(KEY_COUNT,c+1);
+function loadCount(){
+  const t = todayKey();
+  const d = localStorage.getItem(KEY_DATE);
+  if(d !== t){
+    localStorage.setItem(KEY_DATE, t);
+    localStorage.setItem(KEY_COUNT, "0");
+  }
+  const c = parseInt(localStorage.getItem(KEY_COUNT) || "0", 10);
+  return isNaN(c) ? 0 : c;
+}
+function remainCount(){
+  if(IS_DEBUG) return DAILY_LIMIT; // 見た目は通常通りにしておく
+  const c = loadCount();
+  return Math.max(0, DAILY_LIMIT - Math.min(c, DAILY_LIMIT));
+}
+function consumeOnce(){
+  if(IS_DEBUG) return true; // デバッグは消費しない
+  const c = loadCount();
+  if(c >= DAILY_LIMIT) return false;
+  localStorage.setItem(KEY_COUNT, String(c + 1));
   return true;
 }
 function updateQuota(){
-  const r=Math.max(0,DAILY_LIMIT-loadCount());
-  quota.textContent=r?`今日はあと${r}回`:"今日はもう終わりです";
+  const r = remainCount();
+  quota.textContent = (r <= 0) ? "今日はもう終わりです" : `今日はあと${r}回`;
 }
 
-// ===== イントロ =====
-const introText = Math.random()<0.05
-? "あなたの運勢はどう？\n\n2%の人が\n当たったと解答"
-: "あなたの運勢はどう？\n\n98%の人が\n外れたと解答";
+/* =====================
+   イントロ（数字は固定）
+   出現率だけ 5% / 95%
+===================== */
+function pickIntro(){
+  const rare = Math.random() < 0.05; // B：ちょい出やすく（5%）
+  return rare
+    ? "あなたの運勢はどう？\n\n2%の人が\n当たったと解答"
+    : "あなたの運勢はどう？\n\n98%の人が\n外れたと解答";
+}
 
-// ===== 質問 =====
-const QUESTIONS = Array.from({length:7},(_,i)=>({
-  q:`質問 ${i+1}`,
-  a:["はい","どちらでも","微妙","いいえ"]
-}));
-
-// ===== キャラ =====
-const CHARACTERS = [
-  {name:"dekabusa", img:"dekabusa.png", rate:75, lines:["まあ、そうだな","無理すんな","続けよう"]},
-  {name:"namaken", img:"namaken.png", rate:10, lines:["あとでいい","急ぐな"]},
-  {name:"kanemon", img:"kanemon.png", rate:10, lines:["まあ入る","持っとくか"]},
-  {name:"lion", img:"lionmaru.png", rate:5, special:true}
+/* =====================
+   7問（適当でOK版）
+   4択：テキストだけ
+   （スコアは簡易）
+===================== */
+const QUESTIONS = [
+  { q:"朝いち、どうする？", a:["起きる","もう少し寝る","永遠に寝る","考えない"] },
+  { q:"予定が1つ増えた", a:["行く","様子見","既読無視","今じゃない"] },
+  { q:"財布が軽い", a:["節約する","気にしない","見なかった","増えない"] },
+  { q:"作業が重い", a:["やる","半分やる","やらない","検討はした"] },
+  { q:"人から連絡", a:["返す","遅れて返す","返さない","既に返した気"] },
+  { q:"外がうるさい", a:["耐える","耳栓","逃げる","心を無にする"] },
+  { q:"最後にひとこと", a:["まあ…","普通","無","今日はそういう日"] },
 ];
 
-function pickChar(){
-  let r=Math.random()*100;
-  for(const c of CHARACTERS){
-    if((r-=c.rate)<0) return c;
-  }
-  return CHARACTERS[0];
+// スコア（適当）：左ほど“デカ”、右ほど“ブサ”みたいなイメージ
+const SCORE = [
+  [ 2,  1,  0,  0], // Q1
+  [ 2,  1,  0,  0], // Q2
+  [ 1,  0,  0,  0], // Q3
+  [ 2,  1,  0,  0], // Q4
+  [ 2,  1,  0,  0], // Q5
+  [ 1,  1,  0,  0], // Q6
+  [ 0,  0,  0,  0], // Q7（締め）
+];
+
+/* =====================
+   キャラ（居座り仕様）
+   - ナマケン/カンえもん：次の回答まで居座る
+   - ライオン丸：特別演出後にデカブサへ戻る（居座らない）
+   - 結果画面：必ずデカブサ
+===================== */
+const CHAR = {
+  dekabusa: { img:"dekabusa.png", say:["まあ、そうだな","無理すんな","続けよう","今はそれでいい"] },
+  namaken:  { img:"namaken.png",  say:["あとでいい","急ぐな","寝てもいい","そのうち"] },
+  kanemon:  { img:"kanemon.png",  say:["まあ入る","持っとくか","使わないかも","入れとく"] },
+  lion:     { img:"lionmaru.png", special:true },
+};
+
+// 出現率：デカ75 / ナマ10 / カン10 / ライオン5
+function pickSpeaker(){
+  const r = Math.random() * 100;
+  if(r < 75) return "dekabusa";
+  if(r < 85) return "namaken";
+  if(r < 95) return "kanemon";
+  return "lion";
 }
 
-// ===== DOM =====
-const text=document.getElementById("text");
-const sub=document.getElementById("sub");
-const footer=document.getElementById("choices");
-const quota=document.getElementById("quota");
-const chara=document.getElementById("charaImg");
-const dim=document.getElementById("dim");
-const clap=document.getElementById("clap");
+/* =====================
+   DOM
+===================== */
+const mainEl = document.getElementById("main");
+const text = document.getElementById("text");
+const sub  = document.getElementById("sub");
+const footer = document.getElementById("choices");
+const quota = document.getElementById("quota");
+const charaImg = document.getElementById("charaImg");
+const dim = document.getElementById("dim");
+const clap = document.getElementById("clap");
 
-let step=-1;
+/* =====================
+   進行状態
+===================== */
+let mode = "intro"; // intro | q | result | limit
+let idx = -1;
+let score = 0;
 
-// ===== 表示 =====
+// 現在画面に居るキャラ（居座り用）
+let currentChar = "dekabusa";
+function setChar(name){
+  currentChar = name;
+  charaImg.src = CHAR[name].img;
+}
+
+function lockChoices(locked){
+  if(locked) footer.classList.add("locked");
+  else footer.classList.remove("locked");
+}
+
+/* =====================
+   表示関数
+===================== */
+function showLimit(){
+  mode = "limit";
+  lockChoices(true);
+  setChar("dekabusa");
+  text.textContent = "今日は\nもうこれくらいです\n\nまた明日";
+  sub.textContent = "";
+  updateQuota();
+}
+
 function showIntro(){
   updateQuota();
-  text.textContent=introText;
-  sub.textContent="タップして";
-  footer.classList.add("locked");
+  if(!IS_DEBUG && remainCount() <= 0){
+    showLimit();
+    return;
+  }
+  mode = "intro";
+  idx = -1;
+  score = 0;
+  setChar("dekabusa");
+
+  text.textContent = pickIntro();
+  sub.textContent = "タップして";
+  footer.innerHTML = "";
+  lockChoices(true);
 }
 
-function showQuestion(){
-  step++;
-  if(step>=QUESTIONS.length){ showResult(); return; }
+function renderQuestion(){
+  mode = "q";
+  const q = QUESTIONS[idx];
+  text.textContent = q.q;
+  sub.textContent = `${idx+1} / ${QUESTIONS.length}`;
 
-  const q=QUESTIONS[step];
-  text.textContent=q.q;
-  sub.textContent="";
-  footer.innerHTML="";
-  footer.classList.remove("locked");
+  footer.innerHTML = "";
+  lockChoices(false);
 
-  q.a.forEach(t=>{
-    const b=document.createElement("button");
-    b.textContent=t;
-    b.onclick=()=>afterAnswer();
+  q.a.forEach((label, optIndex) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    b.onclick = () => onAnswer(optIndex);
     footer.appendChild(b);
   });
 }
 
-function afterAnswer(){
-  footer.classList.add("locked");
-  const c=pickChar();
+// 回答後のキャラ台詞（そのキャラのまま次の問題へ）
+function showSpeakerLine(charName){
+  if(charName === "lion"){
+    // ライオン丸：特別演出（暗転＋2行＋拍手）→ 終わったらデカブサに戻して次へ
+    setChar("lion");
+    lockChoices(true);
 
-  chara.src=c.img;
-
-  if(c.special){
     dim.classList.add("show");
-    text.textContent="ザ・トーマレ！";
-    setTimeout(()=>{
-      text.textContent="ザ・トーマレ！\n時を止めてから拍手";
-      clap.play();
-    },400);
-    setTimeout(()=>{
+    text.textContent = "ザ・トーマレ！";
+    sub.textContent = "";
+
+    setTimeout(() => {
+      text.textContent = "ザ・トーマレ！\n時を止めてから拍手";
+      // SE（無くても落ちない）
+      try{
+        const p = clap.play();
+        if(p && typeof p.catch === "function") p.catch(()=>{});
+      }catch(e){}
+    }, 400);
+
+    setTimeout(() => {
       dim.classList.remove("show");
-      chara.src="dekabusa.png";
-      showQuestion();
-    },2000);
-  }else{
-    text.textContent=c.lines[Math.floor(Math.random()*c.lines.length)];
-    setTimeout(()=>{
-      chara.src="dekabusa.png";
-      showQuestion();
-    },600);
+      // ライオン丸は居座らない
+      setChar("dekabusa");
+      nextQuestion();
+    }, 2200);
+
+    return;
   }
+
+  // 通常キャラ：一言表示 → そのキャラのまま次の問題へ（居座り）
+  setChar(charName);
+  lockChoices(true);
+
+  const lines = CHAR[charName].say;
+  const line = lines[Math.floor(Math.random() * lines.length)];
+  text.textContent = line;
+  sub.textContent = "";
+
+  setTimeout(() => {
+    nextQuestion(); // 次の質問へ。キャラはそのまま残る
+  }, 650);
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx >= QUESTIONS.length){
+    showResult();
+    return;
+  }
+  // 次の問題は「今居るキャラのまま」表示される（居座り仕様）
+  renderQuestion();
+}
+
+function onAnswer(optIndex){
+  // スコア加算（適当）
+  if(SCORE[idx] && typeof SCORE[idx][optIndex] === "number"){
+    score += SCORE[idx][optIndex];
+  }
+
+  // 次の“発言者”を抽選して喋らせる
+  const speaker = pickSpeaker();
+  showSpeakerLine(speaker);
 }
 
 function showResult(){
-  if(!consume()){
-    text.textContent="今日は\nもうこれくらいです\n\nまた明日";
-    footer.classList.add("locked");
+  // 結果表示時に回数消費（debugは消費しない）
+  if(!consumeOnce()){
+    showLimit();
     return;
   }
   updateQuota();
-  chara.src="dekabusa.png";
-  text.textContent="結果は\n特に変わりません";
-  sub.textContent="今日は、そういう日だ";
-  footer.classList.add("locked");
+
+  mode = "result";
+  lockChoices(true);
+
+  // 結果は必ずデカブサに戻す（仕様A）
+  setChar("dekabusa");
+
+  // 結果文（雑でOK）
+  let result;
+  if(score >= 9) result = "今日は\n割と動ける\n\nでも無理はするな";
+  else if(score >= 5) result = "今日は\n普通\n\nだいたい普通";
+  else result = "今日は\n無\n\nやらなくていい";
+
+  text.textContent = result;
+  sub.textContent = "今日は、そういう日だ";
 }
 
-// ===== 起動 =====
+/* =====================
+   操作
+===================== */
+mainEl.addEventListener("click", () => {
+  if(mode === "intro"){
+    if(!IS_DEBUG && remainCount() <= 0){
+      showLimit();
+      return;
+    }
+    // 開始
+    nextQuestion();
+  }
+});
+
+/* =====================
+   起動
+===================== */
 showIntro();
-document.querySelector("main").onclick=()=>{
-  if(step===-1) showQuestion();
-};
 </script>
 </body>
 </html>
