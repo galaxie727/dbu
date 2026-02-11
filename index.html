@@ -1,522 +1,286 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>デカブサ占い</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>デカブサ占い</title>
 
-  <style>
-    :root{
-      --bg:#f7f7f7;
-      --card:#ffffff;
-      --line:#e6e6e6;
-      --text:#111;
-      --muted:#666;
-      --accent:#ffd400;
+<style>
+:root{
+  --bg:#f7f7f7;
+  --card:#ffffff;
+  --line:#e6e6e6;
+  --text:#111;
+  --muted:#666;
+  --accent:#ffd400;
 
-      --footer-h: 84px;
-      --deka-w: 224px;
-      --deka-gap: 14px;
-      --text-top-pad: 18px;
-    }
+  --footer-h: 140px;
+  --deka-w: 260px;
+  --deka-gap: 14px;
+}
 
-    *{ box-sizing:border-box; }
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family: system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
 
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
-                   "Noto Sans JP", "Yu Gothic", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+.wrap{
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
 
-    .wrap{
-      min-height: 100svh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-    }
+.card{
+  width:min(680px,100%);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  position:relative;
+}
 
-    .card{
-      width: min(520px, 100%);
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      overflow:hidden;
-      position: relative;
-    }
+header{
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    header{
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap:10px;
-    }
+.headLeft{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 
-    .headLeft{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width: 0;
-    }
+.dot{
+  width:10px;height:10px;
+  border-radius:50%;
+  background:var(--accent);
+}
 
-    .dot{
-      width:10px; height:10px;
-      border-radius:50%;
-      background: var(--accent);
-      flex: 0 0 auto;
-    }
+h1{
+  font-size:14px;
+  margin:0;
+  color:var(--muted);
+  letter-spacing:.08em;
+}
 
-    h1{
-      font-size:14px;
-      font-weight:700;
-      margin:0;
-      letter-spacing:.08em;
-      color:var(--muted);
-      white-space: nowrap;
-    }
+#quota{
+  font-size:12px;
+  color:#999;
+}
 
-    /* 右上：回数表示（2/3などは廃止して「今日はあと◯回」） */
-    #quota{
-      font-size: 12px;
-      color: #9a9a9a;
-      letter-spacing: .08em;
-      white-space: nowrap;
-    }
+main{
+  padding:26px 18px calc(var(--footer-h) + 18px);
+  min-height:520px;
+  text-align:center;
+}
 
-    main{
-      padding: var(--text-top-pad) 18px calc(var(--footer-h) + 18px);
-      text-align:center;
-      min-height: 420px;
-      position: relative;
-    }
+#text{
+  white-space:pre-line;
+  font-size:clamp(28px,4.5vw,36px);
+  line-height:1.55;
+  letter-spacing:.06em;
+}
 
-    #fortune{
-      white-space: pre-line;
-      font-size: 30px;
-      line-height: 1.5;
-      letter-spacing: .06em;
-      margin: 0;
-      text-align: center;
-    }
+#sub{
+  margin-top:20px;
+  font-size:14px;
+  color:#999;
+}
 
-    /* サブ（「タップして」「今日はそういう日です」等） */
-    #subtext{
-      margin: 18px 0 0;
-      font-size: clamp(12px, 3.2vw, 14px);
-      color: #9a9a9a;
-      letter-spacing: .08em;
-      min-height: 1.6em;
-      white-space: nowrap;          /* ←折り返し無し */
-      text-align: center;
-      line-height: 1.9;
-    }
+footer{
+  border-top:1px solid var(--line);
+  height:var(--footer-h);
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:14px;
+}
 
-    /* done時の「もう1回」 */
-    #again{
-      margin: 18px 0 0;             /* ←間を少し広げる */
-      font-size: 14px;
-      color: #9a9a9a;
-      letter-spacing: .08em;
-      min-height: 1.6em;
-      white-space: nowrap;
-      text-align: center;
-      opacity: 0;                   /* ←遅延フェード用 */
-      transition: opacity .25s ease;
-    }
+button{
+  appearance:none;
+  border:1px solid var(--line);
+  background:#fafafa;
+  border-radius:18px;
+  font-size:16px;
+  padding:16px 10px;
+  cursor:pointer;
+}
 
-    /* 点滅（導入の「タップして」だけ） */
-    .blink{
-      animation: blinkFade 1.2s ease-in-out infinite;
-    }
-    @keyframes blinkFade{
-      0%,100%{ opacity: 0.25; }
-      50%    { opacity: 1; }
-    }
+button:active{background:#f0f0f0}
 
-    footer{
-      border-top: 1px solid var(--line);
-      height: var(--footer-h);
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      align-items:center;
-      padding: 0 12px;
-    }
+footer.locked button{
+  opacity:.35;
+  pointer-events:none;
+}
 
-    button{
-      appearance:none;
-      border:1px solid var(--line);
-      background:#fafafa;
-      color:#111;
-      border-radius: 18px;
-      padding:16px 26px;
-      font-size:18px;
-      min-width:160px;
-      cursor:pointer;
-      transition: opacity .15s ease;
-    }
-
-    button:active{
-      transform: translateY(1px);
-      background:#f2f2f2;
-    }
-
-    .locked button,
-    .done button{
-      opacity: .35;
-      cursor: default;
-      pointer-events: none;
-    }
-
-    .dekabusa{
-      position:absolute;
-      right: var(--deka-gap);
-      bottom: var(--footer-h);
-      width: var(--deka-w);
-      height: auto;
-      opacity: .95;
-      pointer-events:none;
-      user-select:none;
-    }
-
-    @media (max-width: 420px){
-      #fortune{ font-size: 28px; }
-      main{ min-height: 380px; }
-      :root{ --deka-w: 210px; }
-      button{ min-width: 140px; }
-    }
-
-    /* ================================
-       WIDE / TALL 強化（iPhone13Pro & Android縦長）
-       既存デザインを崩さず“余白を使う”
-    ================================ */
-
-    /* まず全体：カードの上限を少し拡張（タブレットほどは広げない） */
-    @media (min-width: 390px){
-      .card{
-        width: min(680px, 100%);
-      }
-    }
-
-    /* 縦が取れる端末は main を伸ばして、文字とデカブサを少し大きく */
-    @media (min-height: 740px){
-      :root{
-        --deka-w: 260px;          /* 224→260 */
-        --text-top-pad: 26px;     /* 18→26 */
-      }
-
-      main{
-        min-height: 520px;        /* 420→520 */
-        padding: var(--text-top-pad) 18px calc(var(--footer-h) + 22px);
-      }
-
-      #fortune{
-        font-size: clamp(28px, 4.6vw, 36px);  /* 30固定→可変 */
-        line-height: 1.55;
-      }
-
-      #subtext{
-        margin-top: 22px;
-        font-size: clamp(12px, 3.2vw, 15px);
-      }
-
-      /* 右下のデカブサを少し上に出して“間”を埋める */
-      .dekabusa{
-        bottom: calc(var(--footer-h) + 10px);
-        opacity: .98;
-      }
-
-      /* ボタンを少しだけ大きく（押しやすさと密度UP） */
-      footer{
-        padding: 0 18px;
-        gap: 14px;
-      }
-      button{
-        min-width: 180px;         /* 160→180 */
-        padding: 18px 28px;       /* 16→18 */
-        border-radius: 20px;
-      }
-    }
-
-    /* さらに背が高いAndroid（例: 19.5:9〜）はもう一段だけ密度UP */
-    @media (min-height: 860px){
-      :root{
-        --deka-w: 280px;
-        --text-top-pad: 30px;
-      }
-      main{
-        min-height: 560px;
-        padding: var(--text-top-pad) 18px calc(var(--footer-h) + 24px);
-      }
-      #fortune{
-        font-size: clamp(30px, 4.8vw, 38px);
-      }
-    }
-
-    /* 広い端末はサブ文の折り返し許可（必要ならON）
-    @media (min-width: 390px){
-      #subtext{ white-space: normal; }
-    }
-    */
-  </style>
+.dekabusa{
+  position:absolute;
+  right:var(--deka-gap);
+  bottom:var(--footer-h);
+  width:var(--deka-w);
+  pointer-events:none;
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card">
-      <header>
-        <div class="headLeft">
-          <div class="dot"></div>
-          <h1>デカブサ占い</h1>
-        </div>
-        <div id="quota">今日はあと3回</div>
-      </header>
+<div class="wrap">
+<div class="card">
 
-      <main id="main">
-        <p id="fortune">読み込み中</p>
-        <p id="subtext"></p>
-        <p id="again"></p>
-      </main>
-
-      <footer id="footer" class="locked">
-        <button id="btnHit" type="button">当たった</button>
-        <button id="btnMiss" type="button">外れた</button>
-      </footer>
-
-      <img src="dekabusa.png" class="dekabusa" alt="デカブサ">
-    </div>
+<header>
+  <div class="headLeft">
+    <div class="dot"></div>
+    <h1>デカブサ占い</h1>
   </div>
+  <div id="quota">今日はあと3回</div>
+</header>
 
-  <script>
-    // ========= 設定 =========
-    const INTRO_LOCK_MS = 1000;
-    const DAILY_LIMIT = 3;
-    const AGAIN_DELAY_MS = 700;
+<main>
+  <div id="text">読み込み中</div>
+  <div id="sub"></div>
+</main>
 
-    // デバッグモード：URL末尾に ?debug=1
-    const params = new URLSearchParams(location.search);
-    const IS_DEBUG = params.get("debug") === "1";
+<footer id="choices" class="locked"></footer>
 
-    // LocalStorage keys
-    const KEY_DATE  = "dekabusa_fortune_date";
-    const KEY_COUNT = "dekabusa_fortune_count";
+<img src="dekabusa.png" class="dekabusa" alt="デカブサ">
 
-    function todayKey(){
-      return new Date().toLocaleDateString("ja-JP");
-    }
+</div>
+</div>
 
-    function loadState(){
-      const t = todayKey();
-      const d = localStorage.getItem(KEY_DATE);
-      if(d !== t){
-        localStorage.setItem(KEY_DATE, t);
-        localStorage.setItem(KEY_COUNT, "0");
-      }
-      const c = parseInt(localStorage.getItem(KEY_COUNT) || "0", 10);
-      return { date: t, count: isNaN(c) ? 0 : c };
-    }
+<script>
+// ================= 設定 =================
+const DAILY_LIMIT = 3;
+const KEY_DATE="dekabusa_date";
+const KEY_COUNT="dekabusa_count";
 
-    function setCount(n){
-      localStorage.setItem(KEY_COUNT, String(n));
-    }
+// ================= 質問データ =================
+const FLOW = [
+  {
+    q:"朝の気分は？",
+    a:[
+      {t:"最強", d:2, b:0},
+      {t:"普通", d:1, b:1},
+      {t:"だるい", d:0, b:2},
+      {t:"無", d:0, b:1}
+    ]
+  },
+  {
+    q:"服装の方向性",
+    a:[
+      {t:"デカい", d:2, b:0},
+      {t:"清潔", d:0, b:-1},
+      {t:"ヨレ", d:0, b:2},
+      {t:"気にしない", d:0, b:1}
+    ]
+  },
+  {
+    q:"誘われたら？",
+    a:[
+      {t:"即行く", d:2, b:0},
+      {t:"様子見", d:1, b:1},
+      {t:"既読無視", d:0, b:2},
+      {t:"断る", d:0, b:1}
+    ]
+  }
+];
 
-    function remainCount(){
-      if(IS_DEBUG) return DAILY_LIMIT; // 見た目を変えない（常に「今日はあと3回」扱い）
-      const { count } = loadState();
-      return Math.max(0, DAILY_LIMIT - Math.min(count, DAILY_LIMIT));
-    }
+// ================= 結果 =================
+function judge(d,b){
+  if(d>=5 && b<=1) return "覇王デカ\n\n今日は前に出てOK";
+  if(d>=4 && b>=4) return "暴君デカブサ\n\n近づきすぎ注意";
+  if(b>=5) return "闇ブサ\n\n今日は静かに";
+  return "バランス型\n\n無理しない日";
+}
 
-    function updateQuota(){
-      const remain = remainCount();
-      const quotaEl = document.getElementById("quota");
-      if(remain <= 0){
-        quotaEl.innerText = "今日はもう終わりです";
-      }else{
-        quotaEl.innerText = `今日はあと${remain}回`;
-      }
-    }
+// ================= 状態 =================
+let step=-1;
+let deka=0;
+let busa=0;
 
-    // ========= 文言 =========
-    const intros = [
-      "あなたの運勢はどう？\n\n2%の人が\n当たったと解答",
-      "あなたの運勢はどう？\n\n98%の人が\n外れたと解答"
-    ];
+// ================= util =================
+function today(){
+  return new Date().toLocaleDateString("ja-JP");
+}
+function load(){
+  if(localStorage.getItem(KEY_DATE)!==today()){
+    localStorage.setItem(KEY_DATE,today());
+    localStorage.setItem(KEY_COUNT,"0");
+  }
+  return Number(localStorage.getItem(KEY_COUNT)||0);
+}
+function consume(){
+  const c=load();
+  if(c>=DAILY_LIMIT) return false;
+  localStorage.setItem(KEY_COUNT,c+1);
+  return true;
+}
+function updateQuota(){
+  const r=Math.max(0,DAILY_LIMIT-load());
+  quota.textContent=r?`今日はあと${r}回`:"今日はもう終わりです";
+}
 
-    const fortunes = [
-      "普通です","だいたい\n普通です","特別では\nありません","現状維持です","今のままです",
-      "変化は\nありません","大きな変化は\nありません","いつも通りです","特に\n問題ありません","問題は\n起きません",
+// ================= 表示 =================
+const text=document.getElementById("text");
+const sub=document.getElementById("sub");
+const footer=document.getElementById("choices");
+const quota=document.getElementById("quota");
 
-      "増えません\n\n減りもしません","良くも\n悪くも\nありません","プラスでも\nマイナスでも\nありません","得もしません\n\n損もしません","可もなく\n不可もなく",
-      "期待通り\nではありません","期待外れ\nでもありません","悪くは\nありません","良くも\nありません","どっちでも\nありません",
+function showIntro(){
+  step=-1;
+  deka=0; busa=0;
+  text.textContent="タップして\n占い開始";
+  sub.textContent="";
+  footer.classList.add("locked");
+}
 
-      "やらなくても\n大丈夫です","無理しなくて\n大丈夫です","急がなくて\n大丈夫です","決めなくても\n大丈夫です","今日は\n様子見で\n大丈夫です",
-      "動かなくても\n問題ありません","そのままで\n大丈夫です","休んでも\n大丈夫です","今は\n何もしなくて\n大丈夫です","やめても\n大丈夫です",
+function showQuestion(){
+  step++;
+  if(step>=FLOW.length){ showResult(); return; }
 
-      "今日でなくても\n問題ありません","明日でも\n変わりません","今じゃなくて\n大丈夫です","今日で\n決めなくて\n大丈夫です","あとでも\n同じです",
-      "先でも\n問題ありません","いつかで\n大丈夫です","今度で\n大丈夫です","急ぐ理由は\nありません","今は\nその時では\nありません",
+  const q=FLOW[step];
+  text.textContent=q.q;
+  sub.textContent=`${step+1} / ${FLOW.length}`;
+  footer.innerHTML="";
+  footer.classList.remove("locked");
 
-      "気にしなければ\n問題ありません","忘れても\n大丈夫です","考えすぎなくて\n大丈夫です","深く考えなくて\n大丈夫です","だいたい\nそんなものです",
-      "よくある\nことです","気にしなくて\n大丈夫です","大丈夫です","だいたい\n合っています","だいたい\n外れています",
+  q.a.forEach(o=>{
+    const b=document.createElement("button");
+    b.textContent=o.t;
+    b.onclick=()=>{
+      deka+=o.d;
+      busa+=o.b;
+      showQuestion();
+    };
+    footer.appendChild(b);
+  });
+}
 
-      "期待しないで\nください","過度な期待は\n不要です","期待するほどの\nことでは\nありません","何かが\n起きるとは\n限りません","特別なことは\n起きません",
-      "まあ\nこんな感じです","だいたい\nこのくらいです","思っているほど\nではありません","何とも\n言えません","判断は\nしません"
-    ];
+function showResult(){
+  if(!consume()){
+    text.textContent="今日は\nもうこれくらいです\n\nまた明日";
+    footer.classList.add("locked");
+    return;
+  }
+  updateQuota();
+  text.textContent=judge(deka,busa);
+  sub.textContent="今日はそういう日です";
+  footer.innerHTML="";
+  footer.classList.add("locked");
+}
 
-    const commonAfter = "今日はそういう日です";
-
-    // ========= DOM =========
-    const fortuneEl = document.getElementById("fortune");
-    const subtextEl = document.getElementById("subtext");
-    const againEl   = document.getElementById("again");
-    const footerEl  = document.getElementById("footer");
-    const mainEl    = document.getElementById("main");
-    const btnHit    = document.getElementById("btnHit");
-    const btnMiss   = document.getElementById("btnMiss");
-
-    // ========= 状態 =========
-    // "intro" | "result" | "done" | "limit"
-    let mode = "intro";
-    let canProceed = false;
-
-    function pickRandom(arr){
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function showLimit(){
-      mode = "limit";
-      footerEl.classList.add("locked");
-      footerEl.classList.remove("done");
-
-      fortuneEl.innerText = "今日は\nもうこれくらいです\n\nまた明日";
-      subtextEl.classList.remove("blink");
-      subtextEl.innerText = "";
-      againEl.innerText = "";
-      againEl.style.opacity = 0;
-
-      updateQuota();
-    }
-
-    function showIntro(){
-      updateQuota();
-
-      if(!IS_DEBUG && remainCount() <= 0){
-        showLimit();
-        return;
-      }
-
-      mode = "intro";
-      canProceed = false;
-
-      footerEl.classList.add("locked");
-      footerEl.classList.remove("done");
-
-      fortuneEl.innerText = pickRandom(intros);
-
-      subtextEl.classList.add("blink");
-      subtextEl.innerText = "タップして";
-
-      againEl.innerText = "";
-      againEl.style.opacity = 0;
-
-      setTimeout(() => { canProceed = true; }, INTRO_LOCK_MS);
-    }
-
-    function consumeOnceIfNeeded(){
-      if(IS_DEBUG) return true; // 制限無効（消費しない）
-      const st = loadState();
-      if(st.count >= DAILY_LIMIT) return false;
-      setCount(st.count + 1);
-      return true;
-    }
-
-    function showResultAndMaybeConsume(){
-      if(!IS_DEBUG && remainCount() <= 0){
-        showLimit();
-        return;
-      }
-
-      const ok = consumeOnceIfNeeded();
-      updateQuota();
-
-      if(!ok){
-        showLimit();
-        return;
-      }
-
-      mode = "result";
-      footerEl.classList.remove("locked");
-      footerEl.classList.remove("done");
-
-      fortuneEl.innerText = pickRandom(fortunes);
-
-      subtextEl.classList.remove("blink");
-      subtextEl.innerText = "";
-
-      againEl.innerText = "";
-      againEl.style.opacity = 0;
-    }
-
-    function finishOnce(){
-      if(mode !== "result") return;
-      mode = "done";
-
-      // 「今日はそういう日です」だけ（回数表示は出さない）
-      subtextEl.classList.remove("blink");
-      subtextEl.innerText = commonAfter;
-
-      // 遅れて「もう1回（タップ）」を出す
-      againEl.innerText = "もう1回（タップ）";
-      againEl.style.opacity = 0;
-      setTimeout(() => {
-        if(mode === "done"){
-          againEl.style.opacity = 0.85;
-        }
-      }, AGAIN_DELAY_MS);
-
-      // ボタン無効化
-      footerEl.classList.add("done");
-    }
-
-    function proceed(){
-      if(mode === "intro"){
-        if(!canProceed) return;
-        showResultAndMaybeConsume();
-        return;
-      }
-
-      if(mode === "done"){
-        // ★導入に戻らず、次の占い結果へ
-        if(!IS_DEBUG && remainCount() <= 0){
-          showLimit();
-          return;
-        }
-        showResultAndMaybeConsume();
-        return;
-      }
-
-      // result / limit では main タップは何もしない
-    }
-
-    // main タップ（intro→result / done→result）
-    mainEl.addEventListener("click", proceed);
-    mainEl.addEventListener("touchend", (e) => {
-      if((mode === "intro" && canProceed) || mode === "done"){
-        e.preventDefault();
-        proceed();
-      }
-    }, { passive: false });
-
-    // 当たった/外れた：どっちでも同じ（1回だけ）
-    btnHit.addEventListener("click", (e) => { e.stopPropagation(); finishOnce(); });
-    btnMiss.addEventListener("click", (e) => { e.stopPropagation(); finishOnce(); });
-
-    // 起動
-    updateQuota();
-    showIntro();
-  </script>
+// ================= 起動 =================
+updateQuota();
+showIntro();
+document.querySelector("main").onclick=()=>{
+  if(step===-1) showQuestion();
+};
+</script>
 </body>
 </html>
