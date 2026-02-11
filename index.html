@@ -4,71 +4,45 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>デカブサ占い</title>
-
   <style>
     :root{
-      --bg:#f6f6f6;
+      --bg:#f7f7f7;
       --card:#ffffff;
-      --line:#e9e9e9;
+      --line:#e6e6e6;
       --text:#111;
       --muted:#666;
       --muted2:#9a9a9a;
       --accent:#ffd400;
 
-      --maxw:520px;
-      --pad:22px;
-      --btn-h:56px;
-    }
+      --footer-h: 92px;
+      --char-w: 240px;
+      --char-gap: 12px;
 
+      --maxw:520px;
+    }
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
     body{
       margin:0;
       font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
                    "Noto Sans JP", "Yu Gothic", sans-serif;
       background: var(--bg);
       color: var(--text);
-      overflow-x:hidden;
     }
-
-    /* ====== 背景粒子（薄い、上品） ====== */
-    .bgParticles{
-      position:fixed; inset:0;
-      pointer-events:none;
-      z-index:0;
-      opacity:.65;
-      background:
-        radial-gradient(circle at 12% 18%, rgba(0,0,0,0.06) 1px, transparent 2px) 0 0 / 26px 26px,
-        radial-gradient(circle at 72% 62%, rgba(0,0,0,0.05) 1px, transparent 2px) 0 0 / 34px 34px,
-        radial-gradient(circle at 42% 84%, rgba(0,0,0,0.04) 1px, transparent 2px) 0 0 / 44px 44px,
-        linear-gradient(#ffffff, #ffffff);
-      filter: saturate(0.9);
-      animation: drift 18s linear infinite;
-    }
-    @keyframes drift{
-      0%   { transform: translate3d(0,0,0); }
-      100% { transform: translate3d(-40px, -60px, 0); }
-    }
-
     .wrap{
       min-height: 100svh;
       display:flex;
       align-items:center;
       justify-content:center;
       padding: 18px;
-      position:relative;
-      z-index:1;
     }
-
     .card{
       width: min(var(--maxw), 100%);
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 14px;
       overflow:hidden;
-      position:relative;
+      position: relative;
     }
-
     header{
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
@@ -77,21 +51,18 @@
       justify-content: space-between;
       gap:10px;
     }
-
     .headLeft{
       display:flex;
       align-items:center;
       gap:10px;
-      min-width: 0;
+      min-width:0;
     }
-
     .dot{
       width:10px; height:10px;
       border-radius:50%;
       background: var(--accent);
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
-
     h1{
       font-size:14px;
       font-weight:700;
@@ -100,50 +71,44 @@
       color:var(--muted);
       white-space: nowrap;
     }
-
     #quota{
       font-size: 12px;
-      color: #9a9a9a;
+      color: var(--muted2);
       letter-spacing: .08em;
       white-space: nowrap;
+      user-select:none;
     }
 
     main{
-      padding: 22px 18px 26px;
+      padding: 18px 18px calc(var(--footer-h) + 16px);
+      min-height: 560px; /* iPhone 13 Proでも間延びしない */
+      position: relative;
       text-align:center;
-      position:relative;
-      min-height: 520px; /* iPhone 13 Proの縦余白を“意図的”に使う */
     }
 
-    .titleArea{
+    /* ====== TOP ====== */
+    .topTitle{
       margin-top: 18px;
-    }
-
-    .t1{
-      font-size: clamp(20px, 5.8vw, 30px);
+      font-size: clamp(18px, 5.6vw, 26px);
       font-weight: 700;
-      letter-spacing: .06em;
-      margin: 0 0 18px;
-    }
-
-    /* 98%ブロック */
-    .t2{
-      font-size: clamp(20px, 6.3vw, 34px);
-      font-weight: 800;
-      letter-spacing: .06em;
-      margin: 0;
-      line-height: 1.35;
+      letter-spacing:.06em;
+      line-height:1.45;
       white-space: pre-line;
     }
-
+    .topCopy{
+      margin-top: 10px;
+      font-size: clamp(18px, 6.1vw, 30px);
+      font-weight: 800;
+      letter-spacing:.06em;
+      line-height:1.35;
+      white-space: pre-line;
+    }
     .tapHint{
-      margin: 18px 0 0;
+      margin: 14px 0 0;
       font-size: 13px;
       color: rgba(0,0,0,0.28);
       letter-spacing: .14em;
       user-select:none;
-    }
-    .tapHint.blink{
       animation: hintBlink 1.25s ease-in-out infinite;
     }
     @keyframes hintBlink{
@@ -151,23 +116,20 @@
       50%    { opacity: .9; }
     }
 
-    /* キャラエリア */
     .hero{
-      margin: 44px auto 0;
-      width: min(260px, 70%);
+      margin: 34px auto 0;
+      width: min(280px, 72%);
       position: relative;
       display:flex;
       align-items:flex-end;
       justify-content:center;
     }
-
-    /* “影”で下の空欄を埋める（高級感） */
     .heroShadow{
       position:absolute;
       left:50%;
-      bottom: -18px;
+      bottom:-18px;
       transform: translateX(-50%);
-      width: 360px;
+      width: 380px;
       height: 170px;
       background: radial-gradient(ellipse at center, rgba(0,0,0,0.12), transparent 66%);
       filter: blur(22px);
@@ -175,14 +137,11 @@
       pointer-events:none;
       z-index:0;
     }
-
-    img#deka{
+    #topDeka{
       width: 100%;
       height:auto;
       display:block;
-      position: relative;
       z-index:1;
-      /* ゆっくり揺れ */
       transform-origin: 50% 100%;
       animation: bob 3.6s ease-in-out infinite;
       will-change: transform;
@@ -192,10 +151,8 @@
       50%    { transform: translateY(-6px) rotate(0.2deg); }
     }
 
-    /* “瞬きっぽい”表現：ごく短時間だけ縦を潰す（自然寄り） */
-    .blinkSim{
-      animation: blinkSim 6.8s infinite;
-    }
+    /* “瞬きっぽい” */
+    .blinkSim{ animation: blinkSim 6.8s infinite; }
     @keyframes blinkSim{
       0%, 95%, 100% { filter:none; }
       96% { transform: translateY(-5px) scaleY(0.985) scaleX(1.002); }
@@ -203,77 +160,260 @@
       98% { transform: translateY(-5px) scaleY(0.985) scaleX(1.002); }
     }
 
+    /* ====== 共通ボタン ====== */
     footer{
       border-top: 1px solid var(--line);
-      padding: 14px 12px 18px;
+      height: var(--footer-h);
       display:flex;
-      flex-direction:column;
       gap:10px;
-      align-items:center;
       justify-content:center;
+      align-items:center;
+      padding: 0 12px;
+      background:#fff;
     }
-
-    .startBtn{
+    button{
       appearance:none;
-      border: none;
+      border:1px solid var(--line);
+      background:#fafafa;
+      color:#111;
+      border-radius: 18px;
+      padding:16px 26px;
+      font-size:18px;
+      min-width:160px;
+      cursor:pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+    button:active{
+      transform: translateY(1px) scale(0.99);
+      background:#f2f2f2;
+    }
+    .primary{
+      border:none;
       background:#111;
       color:#fff;
       border-radius: 28px;
-      height: var(--btn-h);
-      padding: 0 34px;
-      font-size: 16px;
-      letter-spacing: .12em;
-      cursor:pointer;
-      transition: transform .12s ease, opacity .2s ease;
-      min-width: 210px;
+      min-width: 220px;
+      letter-spacing:.12em;
     }
-    .startBtn:active{
-      transform: translateY(1px) scale(0.985);
-      opacity:.92;
+    .locked button{
+      opacity:.35;
+      pointer-events:none;
+      cursor: default;
     }
 
-    .note{
+    /* ====== GAME ====== */
+    #progress{
+      font-size: 12px;
+      color: var(--muted2);
+      letter-spacing:.14em;
+      margin: 6px 0 0;
+      user-select:none;
+    }
+    #question{
+      margin: 18px 0 0;
+      font-size: clamp(18px, 5.6vw, 28px);
+      line-height: 1.45;
+      letter-spacing: .06em;
+      white-space: pre-line;
+      min-height: 3.2em;
+    }
+    .bubble{
+      display:inline-block;
+      margin: 18px auto 0;
+      padding: 10px 14px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: #fff;
+      border-radius: 18px;
+      color:#111;
+      font-size: 14px;
+      letter-spacing:.06em;
+      min-height: 1.6em;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .18s ease, transform .18s ease;
+      max-width: 92%;
+      user-select:none;
+    }
+    .bubble.on{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* キャラ常駐 */
+    #charImg{
+      position:absolute;
+      right: var(--char-gap);
+      bottom: var(--footer-h);
+      width: var(--char-w);
+      height:auto;
+      pointer-events:none;
+      user-select:none;
+      opacity:.98;
+    }
+
+    /* ====== 結果 ====== */
+    #calcArea, #resultArea{ display:none; }
+    #calcText{
+      margin-top: 110px;
+      color:#666;
+      letter-spacing:.08em;
+      font-size: 16px;
+    }
+    #percentBig{
+      margin-top: 70px;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      line-height: 1;
+    }
+    #rankText{
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+    #resultLines{
+      margin-top: 14px;
+      white-space: pre-line;
+      font-size: 16px;
+      line-height: 1.9;
+      color:#111;
+    }
+    #tapBack{
+      margin-top: 18px;
+      color: var(--muted2);
+      font-size: 12px;
+      letter-spacing: .08em;
+      user-select:none;
+    }
+
+    /* ====== 仲間紹介（モーダル） ====== */
+    .modalBack{
+      position: fixed;
+      inset:0;
+      background: rgba(0,0,0,0.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 999;
+    }
+    .modalBack.on{ display:flex; }
+
+    .modal{
+      width: min(520px, 100%);
+      background:#fff;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+    }
+    .modalTitle{
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing:.08em;
+      color: var(--muted);
+      margin:0;
+    }
+    .modalBody{
+      padding: 16px;
+      text-align:center;
+    }
+    .charStage{
+      margin-top: 6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+    .navBtn{
+      width:44px;
+      min-width:44px;
+      height:44px;
+      padding:0;
+      border-radius: 14px;
+      font-size: 18px;
+    }
+    .charCard{
+      width: min(320px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 12px 14px;
+      background: #fff;
+    }
+    .charName{
+      font-weight: 800;
+      letter-spacing:.08em;
+      margin: 6px 0 8px;
+    }
+    .charDesc{
+      color: var(--muted2);
+      font-size: 12px;
+      line-height: 1.7;
+      letter-spacing:.04em;
+      min-height: 3.4em;
+    }
+    .charPreview{
+      width: 220px;
+      height:auto;
+      display:block;
+      margin: 0 auto;
+    }
+    .modalFoot{
+      border-top: 1px solid var(--line);
+      padding: 12px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      background:#fff;
+    }
+    .miniNote{
+      margin-top: 10px;
       font-size: 12px;
       color: rgba(0,0,0,0.34);
       letter-spacing: .06em;
-      user-select:none;
-      text-align:center;
       line-height: 1.7;
     }
 
-    /* ====== フェード演出 ====== */
+    /* ====== フェード ====== */
     .fadeLayer{
       position: fixed;
       inset: 0;
       background: #fff;
       opacity: 0;
       pointer-events: none;
-      z-index: 9999;
-      transition: opacity .35s ease;
+      z-index: 1000;
+      transition: opacity .30s ease;
     }
     .fadeLayer.on{
       opacity: 1;
       pointer-events: auto;
     }
 
-    /* アニメ抑制設定 */
-    @media (prefers-reduced-motion: reduce){
-      .bgParticles, img#deka, .tapHint.blink{
-        animation: none !important;
-      }
-      .fadeLayer{ transition:none; }
-    }
-
     @media (max-width: 420px){
-      main{ min-height: 480px; }
+      :root{ --char-w: 220px; }
+      main{ min-height: 520px; }
+      button{ min-width: 140px; }
+      .primary{ min-width: 200px; }
+      #percentBig{ font-size: 58px; }
       .heroShadow{ width: 320px; }
-      .startBtn{ min-width: 190px; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      #topDeka, .tapHint{ animation:none!important; }
+      .fadeLayer{ transition:none; }
     }
   </style>
 </head>
 
 <body>
-  <div class="bgParticles" aria-hidden="true"></div>
   <div class="fadeLayer" id="fade"></div>
 
   <div class="wrap">
@@ -283,64 +423,427 @@
           <div class="dot"></div>
           <h1>デカブサ占い</h1>
         </div>
-        <div id="quota">今日はあと3回</div>
+        <div id="quota">今日はあと∞回</div>
       </header>
 
-      <main>
-        <div class="titleArea">
-          <p class="t1">あなたの運勢はどう？</p>
-          <p class="t2">98%の人が
-外れたと回答</p>
-          <div class="tapHint blink" id="tapHint">タップして</div>
-        </div>
+      <main id="main">
 
-        <div class="hero">
-          <div class="heroShadow"></div>
-          <!-- 画像ファイル名は今まで通りでOK -->
-          <img id="deka" class="blinkSim" src="dekabusa.png" alt="デカブサ">
-        </div>
+        <!-- ===== TOP ===== -->
+        <section id="screenTop">
+          <div class="topTitle">あなたの運勢はどう？</div>
+          <div class="topCopy">98%の人が
+外れたと回答</div>
+          <div class="tapHint" id="tapHint">タップして</div>
+
+          <div class="hero">
+            <div class="heroShadow"></div>
+            <img id="topDeka" class="blinkSim" src="dekabusa.png" alt="デカブサ">
+          </div>
+
+          <div class="miniNote">※当たったと思っても外れています</div>
+        </section>
+
+        <!-- ===== GAME ===== -->
+        <section id="screenGame" style="display:none;">
+          <div id="progress">1 / 7</div>
+          <div id="question">読み込み中</div>
+          <div id="bubble" class="bubble"></div>
+
+          <div id="calcArea">
+            <div id="calcText">今日の運勢を集計中…</div>
+          </div>
+
+          <div id="resultArea">
+            <div id="percentBig">0%</div>
+            <div style="margin-top:10px;color:#666;letter-spacing:.12em;font-size:12px;">今日の運勢</div>
+            <div id="rankText"></div>
+            <div id="resultLines"></div>
+            <div id="tapBack">タップでトップへ</div>
+          </div>
+
+          <img id="charImg" src="" alt="キャラ">
+        </section>
+
       </main>
 
-      <footer>
-        <button class="startBtn" id="btnStart" type="button">占ってみる</button>
-        <div class="note">※当たったと思っても外れています</div>
+      <!-- ===== FOOTER ===== -->
+      <footer id="footerTop">
+        <button id="btnStart" class="primary" type="button">START</button>
       </footer>
+
+      <footer id="footerGame" class="" style="display:none;">
+        <button id="btnYes" type="button">はい</button>
+        <button id="btnNo" type="button">いいえ</button>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ===== 仲間紹介モーダル ===== -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="仲間紹介">
+      <div class="modalHead">
+        <p class="modalTitle">仲間紹介</p>
+        <div style="font-size:12px;color:#9a9a9a;letter-spacing:.08em;">必ず選択</div>
+      </div>
+
+      <div class="modalBody">
+        <div class="charStage">
+          <button class="navBtn" id="btnPrev" type="button">‹</button>
+
+          <div class="charCard">
+            <img id="pickImg" class="charPreview" src="dekabusa.png" alt="">
+            <div class="charName" id="pickName">デカブサ</div>
+            <div class="charDesc" id="pickDesc">まあ…やるだけやれ。</div>
+          </div>
+
+          <button class="navBtn" id="btnNext" type="button">›</button>
+        </div>
+
+        <div class="miniNote">
+          追加キャラは、表示と文言が変わるだけです。<br>
+          やることは変わりません。
+        </div>
+      </div>
+
+      <div class="modalFoot">
+        <button id="btnChoose" class="primary" type="button">このキャラにする</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // ===== 設定 =====
-    const NEXT_URL = "game.html";   // 本編
-    const FADE_MS  = 360;
+    // ========= デバッグ（回数制限なし） =========
+    const IS_DEBUG_UNLIMITED = true;
 
-    // 「タップして」でも開始できる（画面タップ）
-    const btnStart = document.getElementById("btnStart");
-    const fade = document.getElementById("fade");
+    // ========= 画面 =========
+    const screenTop  = document.getElementById("screenTop");
+    const screenGame = document.getElementById("screenGame");
+    const footerTop  = document.getElementById("footerTop");
+    const footerGame = document.getElementById("footerGame");
+    const fade       = document.getElementById("fade");
 
-    function goNext(){
-      // 二重起動防止
-      if (fade.classList.contains("on")) return;
+    // ========= 仲間（ここだけ画像名を合わせればOK） =========
+    const CHAR_LIST = [
+      { id:"dekabusa", name:"デカブサ", img:"dekabusa.png", desc:"まあ…やるだけやれ。" },
+      { id:"lion",    name:"ライオン丸", img:"lionmaru.png", desc:"……黙って見ろ。" },
+      { id:"namaken", name:"ナマケン",   img:"namaken.png",  desc:"…うん…まあ…" },
+      { id:"tora",    name:"とらさん",   img:"torasan.png",  desc:"よし。次いくか。" },
+      // ※カバオは出さない方針なら、この行は消してOK
+      // { id:"kaba",    name:"カバオ",     img:"kabao.png",    desc:"水だ。まあまあ。" },
+      { id:"kane",    name:"カンえもん", img:"kaneemon.png", desc:"（入ってる）三次元だ。" },
+    ];
 
-      // フェード
-      fade.classList.add("on");
+    // ========= キャラ一言（回答後に出すだけ） =========
+    const LINES = {
+      dekabusa: ["まあそうだな","うん","知らん","そういう日だ","気にするな","次","いいんじゃない"],
+      lion: ["……","よかろう","悪くない","うむ","まあな","次だ","黙って見ろ"],
+      namaken: ["…うん","…まあ","…そう","…いい","…次","…知らん","…だるい"],
+      tora: ["よし","ふむ","なるほど","悪くない","次いくか","まあいい","気にするな"],
+      kane: ["（入ってる）","三次元だ","普通だ","次","まあな","気にするな","うん"]
+    };
 
-      // 少し待って遷移
-      setTimeout(() => {
-        location.href = NEXT_URL;
-      }, FADE_MS);
+    // ========= 質問プール（全混ぜ） =========
+    const Q = {
+      mind: [
+        "最近ワクワクしている？","直感は信じる方？","今日は誰かに会いたい？","最近笑った？","新しいことを始めたい？",
+        "なんとなく不安を感じる？","気分が軽い？","今日は調子が良い気がする？","自分は運が良いと思う？","最近うまくいったことがある？"
+      ],
+      deka: [
+        "今日はやる気ある？","今日は何もしなくてもいいと思う？","早く帰りたい？","今日は様子見したい？","深く考えたくない？",
+        "とりあえず寝たい？","動くより止まる方が楽？","今はその時じゃないと思う？","面倒なことを避けたい？","今日は静かに過ごしたい？"
+      ],
+      joke: [
+        "昼寝したい？","チーズ食べたい？","突然どこかへ行きたい？","叫びたい？","今日はラーメン食べたい？",
+        "雨の日は嫌い？","何か買いたい？","甘いものが食べたい？","休みが欲しい？","音楽を聴きたい？"
+      ],
+      life: [
+        "朝ちゃんと起きられた？","今日は外に出たい？","最近運動した？","部屋は片付いている？","今日は人と話したい？",
+        "何か作りたい？","本や動画を見たい？","今日は時間に余裕がある？","最近空を見た？","今日は散歩したい？"
+      ],
+      zen: [
+        "無意味な時間も必要だと思う？","急ぐ必要はないと思う？","結果より過程が大事だと思う？","何もしない日も価値があると思う？","迷ったら止まる派？",
+        "人生は流れに任せる方？","運は巡ると思う？","なんとかなると思う？","今日は自然体でいたい？","頑張りすぎない方が良いと思う？"
+      ],
+    };
+
+    function pickN(arr, n){
+      const copy = [...arr];
+      const out = [];
+      for(let i=0;i<n && copy.length;i++){
+        const j = Math.floor(Math.random()*copy.length);
+        out.push(copy.splice(j,1)[0]);
+      }
+      return out;
+    }
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    function buildSevenQuestions(){
+      const list = [
+        ...pickN(Q.mind, 2),
+        ...pickN(Q.deka, 2),
+        ...pickN(Q.joke, 1),
+        ...pickN(Q.life, 1),
+        ...pickN(Q.zen, 1),
+      ];
+      return shuffle(list);
     }
 
-    btnStart.addEventListener("click", (e) => {
+    // ========= 結果（確定） =========
+    function getRank(p){
+      if(p <= 19) return "絶不調";
+      if(p <= 39) return "低調";
+      if(p <= 59) return "普通";
+      if(p <= 79) return "好調";
+      return "絶好調";
+    }
+    const RESULT_LINES = {
+      "絶不調": ["今日は運勢が良くない。", "どうせ外れるから気にするな。"],
+      "低調":   ["今日は少し流れが悪い。", "まあ、そんな日もある。"],
+      "普通":   ["今日は普通。", "特別ではないが問題もない。"],
+      "好調":   ["今日は悪くない。", "少しだけ動いてもいいかもしれない。"],
+      "絶好調": ["今日はかなり良い流れ。", "珍しい日だ。"]
+    };
+
+    // ========= DOM（ゲーム） =========
+    const progressEl = document.getElementById("progress");
+    const questionEl = document.getElementById("question");
+    const bubbleEl   = document.getElementById("bubble");
+    const btnYes     = document.getElementById("btnYes");
+    const btnNo      = document.getElementById("btnNo");
+    const charImg    = document.getElementById("charImg");
+
+    const calcArea   = document.getElementById("calcArea");
+    const resultArea = document.getElementById("resultArea");
+    const percentBig = document.getElementById("percentBig");
+    const rankText   = document.getElementById("rankText");
+    const resultLines= document.getElementById("resultLines");
+
+    // ========= 仲間モーダル =========
+    const modalBack  = document.getElementById("modalBack");
+    const btnPrev    = document.getElementById("btnPrev");
+    const btnNext    = document.getElementById("btnNext");
+    const btnChoose  = document.getElementById("btnChoose");
+    const pickImg    = document.getElementById("pickImg");
+    const pickName   = document.getElementById("pickName");
+    const pickDesc   = document.getElementById("pickDesc");
+
+    let pickIndex = 0;
+
+    function openModal(){
+      pickIndex = 0;
+      renderPick();
+      modalBack.classList.add("on");
+      modalBack.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      modalBack.classList.remove("on");
+      modalBack.setAttribute("aria-hidden","true");
+    }
+    function renderPick(){
+      const c = CHAR_LIST[pickIndex];
+      pickImg.src = c.img;
+      pickImg.alt = c.name;
+      pickName.textContent = c.name;
+      pickDesc.textContent = c.desc;
+    }
+
+    btnPrev.addEventListener("click", (e)=>{
       e.stopPropagation();
-      goNext();
+      pickIndex = (pickIndex - 1 + CHAR_LIST.length) % CHAR_LIST.length;
+      renderPick();
+    });
+    btnNext.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      pickIndex = (pickIndex + 1) % CHAR_LIST.length;
+      renderPick();
     });
 
-    // 画面タップでも開始（シンプルに）
-    document.addEventListener("click", (e) => {
-      // ボタン押下は上で処理済み
-      if (e.target === btnStart) return;
-      goNext();
+    // ========= 画面遷移 =========
+    function showTop(){
+      screenTop.style.display = "";
+      screenGame.style.display = "none";
+      footerTop.style.display = "";
+      footerGame.style.display = "none";
+    }
+    function showGame(){
+      screenTop.style.display = "none";
+      screenGame.style.display = "";
+      footerTop.style.display = "none";
+      footerGame.style.display = "";
+    }
+
+    // ========= START（強制キャラ選択） =========
+    const btnStart = document.getElementById("btnStart");
+    function goStartFlow(){
+      // フェードは軽く
+      fade.classList.add("on");
+      setTimeout(()=>{
+        fade.classList.remove("on");
+        openModal(); // 必ず選択
+      }, 220);
+    }
+    btnStart.addEventListener("click", (e)=>{ e.stopPropagation(); goStartFlow(); });
+
+    // TOPのどこタップでもSTART（ボタンが主だけど便利）
+    document.getElementById("screenTop").addEventListener("click", (e)=>{
+      // 連打防止っぽく軽く
+      goStartFlow();
     }, { passive:true });
+
+    // ========= ゲーム本体 =========
+    let selectedCharId = null;
+    let questions = [];
+    let idx = 0;
+    let results = [];
+    let locked = false;
+
+    function sayLine(){
+      const pool = LINES[selectedCharId] || LINES.dekabusa;
+      return pool[Math.floor(Math.random()*pool.length)];
+    }
+
+    function renderQuestion(){
+      progressEl.textContent = `${idx+1} / 7`;
+      questionEl.textContent = questions[idx];
+      bubbleEl.classList.remove("on");
+      bubbleEl.textContent = "";
+      footerGame.classList.remove("locked");
+      locked = false;
+
+      // 結果表示/集計非表示
+      calcArea.style.display = "none";
+      resultArea.style.display = "none";
+    }
+
+    function lockButtons(){
+      footerGame.classList.add("locked");
+      locked = true;
+    }
+
+    function waitMs(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+    async function onAnswer(){
+      if(locked) return;
+      lockButtons();
+
+      // 各問：%は完全ランダム（非表示）
+      const v = Math.floor(Math.random() * 101);
+      results.push(v);
+
+      // 一言
+      bubbleEl.textContent = sayLine();
+      bubbleEl.classList.add("on");
+
+      await waitMs(650);
+
+      idx++;
+      if(idx >= 7){
+        finish();
+      }else{
+        renderQuestion();
+      }
+    }
+
+    btnYes.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
+    btnNo.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
+
+    async function finish(){
+      // UI
+      footerGame.classList.add("locked");
+      locked = true;
+
+      // 集計中…
+      questionEl.textContent = "";
+      bubbleEl.classList.remove("on");
+      bubbleEl.textContent = "";
+      calcArea.style.display = "block";
+      resultArea.style.display = "none";
+
+      await waitMs(800);
+
+      const avg = Math.floor(results.reduce((a,b)=>a+b,0) / results.length);
+
+      calcArea.style.display = "none";
+      resultArea.style.display = "block";
+
+      percentBig.textContent = "0%";
+      rankText.textContent = "";
+      resultLines.textContent = "";
+
+      await countUpPercent(percentBig, avg, 1000);
+
+      const rank = getRank(avg);
+      rankText.textContent = rank;
+      const lines = RESULT_LINES[rank] || ["今日はそんな日。","気にするな。"];
+      resultLines.textContent = lines.join("\n");
+
+      // タップでトップへ（強制選択なので毎回TOPから）
+      const main = document.getElementById("main");
+      const once = () => {
+        main.removeEventListener("click", once);
+        showTop();
+      };
+      setTimeout(()=> main.addEventListener("click", once, { once:true }), 0);
+    }
+
+    function countUpPercent(el, target, durationMs){
+      return new Promise((resolve) => {
+        const start = performance.now();
+        const to = Math.max(0, Math.min(100, Math.floor(target)));
+        function tick(now){
+          const t = Math.min(1, (now - start) / durationMs);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const v = Math.round(to * eased);
+          el.textContent = `${v}%`;
+          if(t < 1) requestAnimationFrame(tick);
+          else resolve();
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // ========= キャラ決定 → ゲーム開始 =========
+    btnChoose.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const c = CHAR_LIST[pickIndex];
+      selectedCharId = c.id;
+
+      // 保存（必要なら後で参照できる）
+      localStorage.setItem("selectedCharacter", selectedCharId);
+
+      // キャラ画像セット（ゲーム中ずっと表示）
+      charImg.src = c.img;
+
+      closeModal();
+
+      // ゲーム準備
+      questions = buildSevenQuestions();
+      idx = 0;
+      results = [];
+
+      // 画面切替（軽くフェード）
+      fade.classList.add("on");
+      setTimeout(()=>{
+        fade.classList.remove("on");
+        showGame();
+        renderQuestion();
+      }, 220);
+    });
+
+    // モーダル外クリックは閉じない（強制選択）
+    modalBack.addEventListener("click", (e)=>{
+      // 何もしない
+      e.stopPropagation();
+    });
+
+    // ========= 起動 =========
+    showTop();
   </script>
 </body>
 </html>
