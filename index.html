@@ -113,6 +113,15 @@ main{
   line-height: 1.9;
 }
 
+/* 点滅（タップ誘導） */
+.blink{
+  animation: blinkFade 1.2s ease-in-out infinite;
+}
+@keyframes blinkFade{
+  0%,100%{ opacity: 0.25; }
+  50%    { opacity: 1; }
+}
+
 footer{
   border-top: 1px solid var(--line);
   height: var(--footer-h);
@@ -156,6 +165,27 @@ footer.locked button{
   opacity: .98;
   pointer-events:none;
   user-select:none;
+  transform-origin: 70% 85%;
+}
+
+/* 軽い演出：ナマケン/カンえもん */
+.char-pop{
+  animation: pop 260ms ease-out;
+}
+@keyframes pop{
+  0%   { transform: scale(1); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.char-wobble{
+  animation: wobble 520ms ease-in-out;
+}
+@keyframes wobble{
+  0%   { transform: rotate(0deg) translateY(0px); }
+  25%  { transform: rotate(-1.8deg) translateY(-1px); }
+  50%  { transform: rotate( 1.8deg) translateY(0px); }
+  75%  { transform: rotate(-1.0deg) translateY(1px); }
+  100% { transform: rotate(0deg) translateY(0px); }
 }
 
 /* ライオン丸用：軽い暗転 */
@@ -225,7 +255,7 @@ function loadCount(){
   return isNaN(c) ? 0 : c;
 }
 function remainCount(){
-  if(IS_DEBUG) return DAILY_LIMIT; // 見た目は通常通りにしておく
+  if(IS_DEBUG) return DAILY_LIMIT; // 表示は通常のまま
   const c = loadCount();
   return Math.max(0, DAILY_LIMIT - Math.min(c, DAILY_LIMIT));
 }
@@ -246,52 +276,50 @@ function updateQuota(){
    出現率だけ 5% / 95%
 ===================== */
 function pickIntro(){
-  const rare = Math.random() < 0.05; // B：ちょい出やすく（5%）
+  const rare = Math.random() < 0.05; // ちょい出やすく（5%）
   return rare
     ? "あなたの運勢はどう？\n\n2%の人が\n当たったと解答"
     : "あなたの運勢はどう？\n\n98%の人が\n外れたと解答";
 }
 
 /* =====================
-   7問（適当でOK版）
-   4択：テキストだけ
-   （スコアは簡易）
+   7問（デカブサ世界っぽく）
 ===================== */
 const QUESTIONS = [
-  { q:"朝いち、どうする？", a:["起きる","もう少し寝る","永遠に寝る","考えない"] },
-  { q:"予定が1つ増えた", a:["行く","様子見","既読無視","今じゃない"] },
-  { q:"財布が軽い", a:["節約する","気にしない","見なかった","増えない"] },
-  { q:"作業が重い", a:["やる","半分やる","やらない","検討はした"] },
-  { q:"人から連絡", a:["返す","遅れて返す","返さない","既に返した気"] },
-  { q:"外がうるさい", a:["耐える","耳栓","逃げる","心を無にする"] },
-  { q:"最後にひとこと", a:["まあ…","普通","無","今日はそういう日"] },
+  { q:"朝。\n最初にすることは？", a:["とりあえず起きる","起きた体にする","まだ夜の続き","今じゃない"] },
+  { q:"やることが増えた。\nどうする？", a:["一個だけやる","検討はした","永久に保留","見なかった"] },
+  { q:"予定に誘われた。\n返事は？", a:["行けたら行く","あとで返す","既読のまま","気配を消す"] },
+  { q:"財布が軽い。\n気分は？", a:["節約する","気にしない","見ない","増えない"] },
+  { q:"作業が重い。\n手は動く？", a:["動く","半分だけ動く","動かない","やってる感"] },
+  { q:"外がうるさい。\n対処は？", a:["耐える","耳栓","逃げる","心を無にする"] },
+  { q:"最後に。\n今日の方針は？", a:["無理しない","普通","無","今日はそういう日"] },
 ];
 
-// スコア（適当）：左ほど“デカ”、右ほど“ブサ”みたいなイメージ
+/* スコア（雑でOK）：左ほど“動く”、右ほど“動かない” */
 const SCORE = [
-  [ 2,  1,  0,  0], // Q1
-  [ 2,  1,  0,  0], // Q2
-  [ 1,  0,  0,  0], // Q3
-  [ 2,  1,  0,  0], // Q4
-  [ 2,  1,  0,  0], // Q5
-  [ 1,  1,  0,  0], // Q6
-  [ 0,  0,  0,  0], // Q7（締め）
+  [2,1,0,0],
+  [2,1,0,0],
+  [2,1,0,0],
+  [1,1,0,0],
+  [2,1,0,0],
+  [1,1,0,0],
+  [0,0,0,0],
 ];
 
 /* =====================
    キャラ（居座り仕様）
    - ナマケン/カンえもん：次の回答まで居座る
-   - ライオン丸：特別演出後にデカブサへ戻る（居座らない）
+   - ライオン丸：特別演出後「タップで進む」→ 進む時にデカブサへ戻る
    - 結果画面：必ずデカブサ
 ===================== */
 const CHAR = {
-  dekabusa: { img:"dekabusa.png", say:["まあ、そうだな","無理すんな","続けよう","今はそれでいい"] },
-  namaken:  { img:"namaken.png",  say:["あとでいい","急ぐな","寝てもいい","そのうち"] },
-  kanemon:  { img:"kanemon.png",  say:["まあ入る","持っとくか","使わないかも","入れとく"] },
+  dekabusa: { img:"dekabusa.png", say:["まあ、そうだな","無理すんな","続けよう","今はそれでいい","だいたいそんなもんだ"] },
+  namaken:  { img:"namaken.png",  say:["あとでいい","急ぐな","寝てもいい","そのうち","まあ…"] },
+  kanemon:  { img:"kanemon.png",  say:["まあ入る","持っとくか","使わないかも","入れとく","とりあえず"] },
   lion:     { img:"lionmaru.png", special:true },
 };
 
-// 出現率：デカ75 / ナマ10 / カン10 / ライオン5
+/* 出現率：デカ75 / ナマ10 / カン10 / ライオン5 */
 function pickSpeaker(){
   const r = Math.random() * 100;
   if(r < 75) return "dekabusa";
@@ -315,20 +343,27 @@ const clap = document.getElementById("clap");
 /* =====================
    進行状態
 ===================== */
-let mode = "intro"; // intro | q | result | limit
+let mode = "intro"; // intro | q | result | limit | lion_wait
 let idx = -1;
 let score = 0;
 
-// 現在画面に居るキャラ（居座り用）
 let currentChar = "dekabusa";
 function setChar(name){
   currentChar = name;
   charaImg.src = CHAR[name].img;
 }
-
 function lockChoices(locked){
   if(locked) footer.classList.add("locked");
   else footer.classList.remove("locked");
+}
+function clearCharFx(){
+  charaImg.classList.remove("char-pop","char-wobble");
+}
+function applyCharFx(kind){
+  clearCharFx();
+  // reflowでアニメ再発火
+  void charaImg.offsetWidth;
+  if(kind) charaImg.classList.add(kind);
 }
 
 /* =====================
@@ -338,7 +373,9 @@ function showLimit(){
   mode = "limit";
   lockChoices(true);
   setChar("dekabusa");
+  dim.classList.remove("show");
   text.textContent = "今日は\nもうこれくらいです\n\nまた明日";
+  sub.classList.remove("blink");
   sub.textContent = "";
   updateQuota();
 }
@@ -353,8 +390,10 @@ function showIntro(){
   idx = -1;
   score = 0;
   setChar("dekabusa");
+  dim.classList.remove("show");
 
   text.textContent = pickIntro();
+  sub.classList.add("blink");
   sub.textContent = "タップして";
   footer.innerHTML = "";
   lockChoices(true);
@@ -362,8 +401,11 @@ function showIntro(){
 
 function renderQuestion(){
   mode = "q";
+  dim.classList.remove("show");
+
   const q = QUESTIONS[idx];
   text.textContent = q.q;
+  sub.classList.remove("blink");
   sub.textContent = `${idx+1} / ${QUESTIONS.length}`;
 
   footer.innerHTML = "";
@@ -378,50 +420,6 @@ function renderQuestion(){
   });
 }
 
-// 回答後のキャラ台詞（そのキャラのまま次の問題へ）
-function showSpeakerLine(charName){
-  if(charName === "lion"){
-    // ライオン丸：特別演出（暗転＋2行＋拍手）→ 終わったらデカブサに戻して次へ
-    setChar("lion");
-    lockChoices(true);
-
-    dim.classList.add("show");
-    text.textContent = "ザ・トーマレ！";
-    sub.textContent = "";
-
-    setTimeout(() => {
-      text.textContent = "ザ・トーマレ！\n時を止めてから拍手";
-      // SE（無くても落ちない）
-      try{
-        const p = clap.play();
-        if(p && typeof p.catch === "function") p.catch(()=>{});
-      }catch(e){}
-    }, 400);
-
-    setTimeout(() => {
-      dim.classList.remove("show");
-      // ライオン丸は居座らない
-      setChar("dekabusa");
-      nextQuestion();
-    }, 2200);
-
-    return;
-  }
-
-  // 通常キャラ：一言表示 → そのキャラのまま次の問題へ（居座り）
-  setChar(charName);
-  lockChoices(true);
-
-  const lines = CHAR[charName].say;
-  const line = lines[Math.floor(Math.random() * lines.length)];
-  text.textContent = line;
-  sub.textContent = "";
-
-  setTimeout(() => {
-    nextQuestion(); // 次の質問へ。キャラはそのまま残る
-  }, 650);
-}
-
 function nextQuestion(){
   idx++;
   if(idx >= QUESTIONS.length){
@@ -430,6 +428,54 @@ function nextQuestion(){
   }
   // 次の問題は「今居るキャラのまま」表示される（居座り仕様）
   renderQuestion();
+}
+
+/* 回答後のキャラ台詞（居座り） */
+function showSpeakerLine(charName){
+  if(charName === "lion"){
+    // ライオン丸：特別演出 → 自動で進まない（タップで進む）
+    mode = "lion_wait";
+    setChar("lion");
+    lockChoices(true);
+
+    dim.classList.add("show");
+    text.textContent = "ザ・トーマレ！";
+    sub.classList.remove("blink");
+    sub.textContent = "";
+
+    setTimeout(() => {
+      text.textContent = "ザ・トーマレ！\n時を止めてから拍手";
+      // 拍手SE（無くても落ちない）
+      try{
+        const p = clap.play();
+        if(p && typeof p.catch === "function") p.catch(()=>{});
+      }catch(e){}
+      // ここで進行を止める：タップ待ち
+      sub.classList.add("blink");
+      sub.textContent = "タップして続ける";
+    }, 400);
+
+    return;
+  }
+
+  // 通常キャラ：軽い演出＋一言 → 少し待って次へ（キャラはそのまま居座る）
+  setChar(charName);
+  lockChoices(true);
+
+  // 演出（ナマケン/カンえもんは少し目立たせる）
+  if(charName === "namaken") applyCharFx("char-wobble");
+  else if(charName === "kanemon") applyCharFx("char-pop");
+  else clearCharFx();
+
+  const lines = CHAR[charName].say;
+  const line = lines[Math.floor(Math.random() * lines.length)];
+  text.textContent = line;
+  sub.classList.remove("blink");
+  sub.textContent = "";
+
+  setTimeout(() => {
+    nextQuestion();
+  }, 700);
 }
 
 function onAnswer(optIndex){
@@ -454,36 +500,54 @@ function showResult(){
   mode = "result";
   lockChoices(true);
 
-  // 結果は必ずデカブサに戻す（仕様A）
+  // 結果画面は必ずデカブサ
   setChar("dekabusa");
+  clearCharFx();
+  dim.classList.remove("show");
 
-  // 結果文（雑でOK）
   let result;
   if(score >= 9) result = "今日は\n割と動ける\n\nでも無理はするな";
   else if(score >= 5) result = "今日は\n普通\n\nだいたい普通";
   else result = "今日は\n無\n\nやらなくていい";
 
   text.textContent = result;
+  sub.classList.remove("blink");
   sub.textContent = "今日は、そういう日だ";
 }
 
 /* =====================
-   操作
+   操作：タップ進行
 ===================== */
 mainEl.addEventListener("click", () => {
+  // intro → start
   if(mode === "intro"){
     if(!IS_DEBUG && remainCount() <= 0){
       showLimit();
       return;
     }
-    // 開始
+    sub.classList.remove("blink");
     nextQuestion();
+    return;
+  }
+
+  // ライオン丸：ここでだけ「タップで続ける」
+  if(mode === "lion_wait"){
+    // 暗転解除し、デカブサへ戻して次へ
+    dim.classList.remove("show");
+    sub.classList.remove("blink");
+    sub.textContent = "";
+
+    setChar("dekabusa"); // ライオン丸は居座らない
+    clearCharFx();
+    nextQuestion();
+    return;
   }
 });
 
 /* =====================
    起動
 ===================== */
+updateQuota();
 showIntro();
 </script>
 </body>
