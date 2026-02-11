@@ -1,488 +1,346 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>デカブサ占い</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>デカブサ占い</title>
 
-<style>
-:root{
-  --bg:#f7f7f7;
-  --card:#ffffff;
-  --line:#e6e6e6;
-  --text:#111;
-  --muted:#666;
-  --accent:#ffd400;
+  <style>
+    :root{
+      --bg:#f6f6f6;
+      --card:#ffffff;
+      --line:#e9e9e9;
+      --text:#111;
+      --muted:#666;
+      --muted2:#9a9a9a;
+      --accent:#ffd400;
 
-  --footer-h: 140px;
-  --deka-w: 260px;
-  --deka-gap: 14px;
-  --text-top-pad: 26px;
-}
+      --maxw:520px;
+      --pad:22px;
+      --btn-h:56px;
+    }
 
-*{ box-sizing:border-box; }
-body{
-  margin:0;
-  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
-               "Noto Sans JP", "Yu Gothic", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-.wrap{
-  min-height: 100svh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 18px;
-}
-.card{
-  width: min(680px, 100%);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  overflow:hidden;
-  position: relative;
-}
-header{
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap:10px;
-}
-.headLeft{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width: 0;
-}
-.dot{
-  width:10px; height:10px;
-  border-radius:50%;
-  background: var(--accent);
-  flex: 0 0 auto;
-}
-h1{
-  font-size:14px;
-  font-weight:700;
-  margin:0;
-  letter-spacing:.08em;
-  color:var(--muted);
-  white-space: nowrap;
-}
-#quota{
-  font-size: 12px;
-  color: #9a9a9a;
-  letter-spacing: .08em;
-  white-space: nowrap;
-}
-main{
-  padding: var(--text-top-pad) 18px calc(var(--footer-h) + 18px);
-  text-align:center;
-  min-height: 520px;
-  position: relative;
-}
-#text{
-  white-space: pre-line;
-  font-size: clamp(28px, 4.6vw, 36px);
-  line-height: 1.55;
-  letter-spacing: .06em;
-  margin: 0;
-  text-align: center;
-}
-#sub{
-  margin: 20px 0 0;
-  font-size: 14px;
-  color: #9a9a9a;
-  letter-spacing: .08em;
-  min-height: 1.6em;
-  white-space: nowrap;
-  text-align: center;
-  line-height: 1.9;
-}
-.blink{ animation: blinkFade 1.2s ease-in-out infinite; }
-@keyframes blinkFade{
-  0%,100%{ opacity: 0.25; }
-  50%    { opacity: 1; }
-}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
+                   "Noto Sans JP", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x:hidden;
+    }
 
-footer{
-  border-top: 1px solid var(--line);
-  height: var(--footer-h);
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-  justify-content:center;
-  align-items:center;
-  padding: 14px;
-}
-button{
-  appearance:none;
-  border:1px solid var(--line);
-  background:#fafafa;
-  color:#111;
-  border-radius: 18px;
-  padding:16px 10px;
-  font-size:16px;
-  cursor:pointer;
-  transition: opacity .15s ease;
-}
-button:active{
-  transform: translateY(1px);
-  background:#f2f2f2;
-}
-footer.locked button{
-  opacity: .35;
-  cursor: default;
-  pointer-events: none;
-}
+    /* ====== 背景粒子（薄い、上品） ====== */
+    .bgParticles{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index:0;
+      opacity:.65;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(0,0,0,0.06) 1px, transparent 2px) 0 0 / 26px 26px,
+        radial-gradient(circle at 72% 62%, rgba(0,0,0,0.05) 1px, transparent 2px) 0 0 / 34px 34px,
+        radial-gradient(circle at 42% 84%, rgba(0,0,0,0.04) 1px, transparent 2px) 0 0 / 44px 44px,
+        linear-gradient(#ffffff, #ffffff);
+      filter: saturate(0.9);
+      animation: drift 18s linear infinite;
+    }
+    @keyframes drift{
+      0%   { transform: translate3d(0,0,0); }
+      100% { transform: translate3d(-40px, -60px, 0); }
+    }
 
-.character{
-  position:absolute;
-  right: var(--deka-gap);
-  bottom: var(--footer-h);
-  width: var(--deka-w);
-  height: auto;
-  opacity: .98;
-  pointer-events:none;
-  user-select:none;
-}
+    .wrap{
+      min-height: 100svh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      position:relative;
+      z-index:1;
+    }
 
-.dim{
-  position:absolute;
-  inset:0;
-  background: rgba(0,0,0,0.22);
-  opacity:0;
-  pointer-events:none;
-  transition: opacity .2s ease;
-}
-.dim.show{ opacity:1; }
-</style>
+    .card{
+      width: min(var(--maxw), 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    header{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+    }
+
+    .headLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+
+    .dot{
+      width:10px; height:10px;
+      border-radius:50%;
+      background: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    h1{
+      font-size:14px;
+      font-weight:700;
+      margin:0;
+      letter-spacing:.08em;
+      color:var(--muted);
+      white-space: nowrap;
+    }
+
+    #quota{
+      font-size: 12px;
+      color: #9a9a9a;
+      letter-spacing: .08em;
+      white-space: nowrap;
+    }
+
+    main{
+      padding: 22px 18px 26px;
+      text-align:center;
+      position:relative;
+      min-height: 520px; /* iPhone 13 Proの縦余白を“意図的”に使う */
+    }
+
+    .titleArea{
+      margin-top: 18px;
+    }
+
+    .t1{
+      font-size: clamp(20px, 5.8vw, 30px);
+      font-weight: 700;
+      letter-spacing: .06em;
+      margin: 0 0 18px;
+    }
+
+    /* 98%ブロック */
+    .t2{
+      font-size: clamp(20px, 6.3vw, 34px);
+      font-weight: 800;
+      letter-spacing: .06em;
+      margin: 0;
+      line-height: 1.35;
+      white-space: pre-line;
+    }
+
+    .tapHint{
+      margin: 18px 0 0;
+      font-size: 13px;
+      color: rgba(0,0,0,0.28);
+      letter-spacing: .14em;
+      user-select:none;
+    }
+    .tapHint.blink{
+      animation: hintBlink 1.25s ease-in-out infinite;
+    }
+    @keyframes hintBlink{
+      0%,100%{ opacity: .25; }
+      50%    { opacity: .9; }
+    }
+
+    /* キャラエリア */
+    .hero{
+      margin: 44px auto 0;
+      width: min(260px, 70%);
+      position: relative;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+    }
+
+    /* “影”で下の空欄を埋める（高級感） */
+    .heroShadow{
+      position:absolute;
+      left:50%;
+      bottom: -18px;
+      transform: translateX(-50%);
+      width: 360px;
+      height: 170px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.12), transparent 66%);
+      filter: blur(22px);
+      opacity: .75;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    img#deka{
+      width: 100%;
+      height:auto;
+      display:block;
+      position: relative;
+      z-index:1;
+      /* ゆっくり揺れ */
+      transform-origin: 50% 100%;
+      animation: bob 3.6s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes bob{
+      0%,100%{ transform: translateY(0px) rotate(-0.2deg); }
+      50%    { transform: translateY(-6px) rotate(0.2deg); }
+    }
+
+    /* “瞬きっぽい”表現：ごく短時間だけ縦を潰す（自然寄り） */
+    .blinkSim{
+      animation: blinkSim 6.8s infinite;
+    }
+    @keyframes blinkSim{
+      0%, 95%, 100% { filter:none; }
+      96% { transform: translateY(-5px) scaleY(0.985) scaleX(1.002); }
+      97% { transform: translateY(-5px) scaleY(0.92)  scaleX(1.01); }
+      98% { transform: translateY(-5px) scaleY(0.985) scaleX(1.002); }
+    }
+
+    footer{
+      border-top: 1px solid var(--line);
+      padding: 14px 12px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .startBtn{
+      appearance:none;
+      border: none;
+      background:#111;
+      color:#fff;
+      border-radius: 28px;
+      height: var(--btn-h);
+      padding: 0 34px;
+      font-size: 16px;
+      letter-spacing: .12em;
+      cursor:pointer;
+      transition: transform .12s ease, opacity .2s ease;
+      min-width: 210px;
+    }
+    .startBtn:active{
+      transform: translateY(1px) scale(0.985);
+      opacity:.92;
+    }
+
+    .note{
+      font-size: 12px;
+      color: rgba(0,0,0,0.34);
+      letter-spacing: .06em;
+      user-select:none;
+      text-align:center;
+      line-height: 1.7;
+    }
+
+    /* ====== フェード演出 ====== */
+    .fadeLayer{
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: opacity .35s ease;
+    }
+    .fadeLayer.on{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* アニメ抑制設定 */
+    @media (prefers-reduced-motion: reduce){
+      .bgParticles, img#deka, .tapHint.blink{
+        animation: none !important;
+      }
+      .fadeLayer{ transition:none; }
+    }
+
+    @media (max-width: 420px){
+      main{ min-height: 480px; }
+      .heroShadow{ width: 320px; }
+      .startBtn{ min-width: 190px; }
+    }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="card">
-    <header>
-      <div class="headLeft">
-        <div class="dot"></div>
-        <h1>デカブサ占い</h1>
-      </div>
-      <div id="quota"></div>
-    </header>
+  <div class="bgParticles" aria-hidden="true"></div>
+  <div class="fadeLayer" id="fade"></div>
 
-    <main id="main">
-      <p id="text">読み込み中</p>
-      <p id="sub"></p>
-    </main>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="headLeft">
+          <div class="dot"></div>
+          <h1>デカブサ占い</h1>
+        </div>
+        <div id="quota">今日はあと3回</div>
+      </header>
 
-    <footer id="choices" class="locked"></footer>
+      <main>
+        <div class="titleArea">
+          <p class="t1">あなたの運勢はどう？</p>
+          <p class="t2">98%の人が
+外れたと回答</p>
+          <div class="tapHint blink" id="tapHint">タップして</div>
+        </div>
 
-    <img id="charaImg" class="character" src="dekabusa_1.png" alt="character">
-    <div id="dim" class="dim"></div>
+        <div class="hero">
+          <div class="heroShadow"></div>
+          <!-- 画像ファイル名は今まで通りでOK -->
+          <img id="deka" class="blinkSim" src="dekabusa.png" alt="デカブサ">
+        </div>
+      </main>
 
-    <audio id="clap" src="clap.mp3" preload="auto"></audio>
+      <footer>
+        <button class="startBtn" id="btnStart" type="button">占ってみる</button>
+        <div class="note">※当たったと思っても外れています</div>
+      </footer>
+    </div>
   </div>
-</div>
 
-<script>
-/* ===== debug (?debug=1) ===== */
-const params = new URLSearchParams(location.search);
-const IS_DEBUG = params.get("debug") === "1";
+  <script>
+    // ===== 設定 =====
+    const NEXT_URL = "game.html";   // 本編
+    const FADE_MS  = 360;
 
-/* ===== daily limit ===== */
-const DAILY_LIMIT = 3;
-const KEY_DATE="dekabusa_date";
-const KEY_COUNT="dekabusa_count";
+    // 「タップして」でも開始できる（画面タップ）
+    const btnStart = document.getElementById("btnStart");
+    const fade = document.getElementById("fade");
 
-function todayKey(){ return new Date().toLocaleDateString("ja-JP"); }
-function loadCount(){
-  const t = todayKey();
-  const d = localStorage.getItem(KEY_DATE);
-  if(d !== t){
-    localStorage.setItem(KEY_DATE, t);
-    localStorage.setItem(KEY_COUNT, "0");
-  }
-  const c = parseInt(localStorage.getItem(KEY_COUNT) || "0", 10);
-  return isNaN(c) ? 0 : c;
-}
-function remainCount(){
-  if(IS_DEBUG) return DAILY_LIMIT;
-  const c = loadCount();
-  return Math.max(0, DAILY_LIMIT - Math.min(c, DAILY_LIMIT));
-}
-function consumeOnce(){
-  if(IS_DEBUG) return true;
-  const c = loadCount();
-  if(c >= DAILY_LIMIT) return false;
-  localStorage.setItem(KEY_COUNT, String(c + 1));
-  return true;
-}
-function updateQuota(){
-  const r = remainCount();
-  quota.textContent = (r <= 0) ? "今日はもう終わりです" : `今日はあと${r}回`;
-}
+    function goNext(){
+      // 二重起動防止
+      if (fade.classList.contains("on")) return;
 
-/* ===== intro ===== */
-function pickIntro(){
-  const rare = Math.random() < 0.05;
-  return rare
-    ? "あなたの運勢はどう？\n\n2%の人が\n当たったと解答"
-    : "あなたの運勢はどう？\n\n98%の人が\n外れたと解答";
-}
+      // フェード
+      fade.classList.add("on");
 
-/* ===== questions (デカブサ世界っぽく) ===== */
-const QUESTIONS = [
-  { q:"朝。\n最初にすることは？", a:["とりあえず起きる","起きた体にする","まだ夜の続き","今じゃない"] },
-  { q:"やることが増えた。\nどうする？", a:["一個だけやる","検討はした","永久に保留","見なかった"] },
-  { q:"予定に誘われた。\n返事は？", a:["行けたら行く","あとで返す","既読のまま","気配を消す"] },
-  { q:"財布が軽い。\n気分は？", a:["節約する","気にしない","見ない","増えない"] },
-  { q:"作業が重い。\n手は動く？", a:["動く","半分だけ動く","動かない","やってる感"] },
-  { q:"外がうるさい。\n対処は？", a:["耐える","耳栓","逃げる","心を無にする"] },
-  { q:"最後に。\n今日の方針は？", a:["無理しない","普通","無","今日はそういう日"] },
-];
-const SCORE = [
-  [2,1,0,0],
-  [2,1,0,0],
-  [2,1,0,0],
-  [1,1,0,0],
-  [2,1,0,0],
-  [1,1,0,0],
-  [0,0,0,0],
-];
-
-/* ===== characters (2コマ) =====
-   frames: [1,2]
-*/
-const CHAR = {
-  dekabusa: { frames:["dekabusa_1.png","dekabusa_2.png"], say:["まあ、そうだな","無理すんな","続けよう","今はそれでいい","だいたいそんなもんだ"] },
-  namaken:  { frames:["namaken_1.png","namaken_2.png"],   say:["あとでいい","急ぐな","寝てもいい","そのうち","まあ…"] },
-  kanemon:  { frames:["kanemon_1.png","kanemon_2.png"],   say:["まあ入る","持っとくか","使わないかも","入れとく","とりあえず"] },
-  lion:     { frames:["lionmaru_1.png","lionmaru_2.png"], special:true },
-};
-
-/* 出現率：デカ75 / ナマ10 / カン10 / ライオン5 */
-function pickSpeaker(){
-  const r = Math.random() * 100;
-  if(r < 75) return "dekabusa";
-  if(r < 85) return "namaken";
-  if(r < 95) return "kanemon";
-  return "lion";
-}
-
-/* ===== DOM ===== */
-const mainEl = document.getElementById("main");
-const text = document.getElementById("text");
-const sub  = document.getElementById("sub");
-const footer = document.getElementById("choices");
-const quota = document.getElementById("quota");
-const charaImg = document.getElementById("charaImg");
-const dim = document.getElementById("dim");
-const clap = document.getElementById("clap");
-
-/* ===== 2コマアニメ制御 ===== */
-let currentChar = "dekabusa";
-let frameIdx = 0;
-let animTimer = null;
-
-function stopAnim(){
-  if(animTimer){
-    clearInterval(animTimer);
-    animTimer = null;
-  }
-}
-function setChar(name, forceFrame0=true){
-  currentChar = name;
-  stopAnim();
-  if(forceFrame0) frameIdx = 0;
-  charaImg.src = CHAR[name].frames[frameIdx];
-}
-function startTalkAnim(name, intervalMs=180){
-  // セリフ中だけパタパタ
-  stopAnim();
-  currentChar = name;
-  // 今のフレームから開始
-  animTimer = setInterval(() => {
-    frameIdx = 1 - frameIdx;
-    charaImg.src = CHAR[name].frames[frameIdx];
-  }, intervalMs);
-}
-
-/* ===== state ===== */
-let mode = "intro"; // intro | q | result | limit | lion_wait
-let idx = -1;
-let score = 0;
-
-function lockChoices(locked){
-  if(locked) footer.classList.add("locked");
-  else footer.classList.remove("locked");
-}
-
-/* ===== screens ===== */
-function showLimit(){
-  mode = "limit";
-  lockChoices(true);
-  dim.classList.remove("show");
-  setChar("dekabusa", true);
-  text.textContent = "今日は\nもうこれくらいです\n\nまた明日";
-  sub.classList.remove("blink");
-  sub.textContent = "";
-  updateQuota();
-}
-
-function showIntro(){
-  updateQuota();
-  if(!IS_DEBUG && remainCount() <= 0){
-    showLimit();
-    return;
-  }
-  mode = "intro";
-  idx = -1;
-  score = 0;
-  dim.classList.remove("show");
-  setChar("dekabusa", true);
-
-  text.textContent = pickIntro();
-  sub.classList.add("blink");
-  sub.textContent = "タップして";
-  footer.innerHTML = "";
-  lockChoices(true);
-}
-
-function renderQuestion(){
-  mode = "q";
-  dim.classList.remove("show");
-
-  const q = QUESTIONS[idx];
-  text.textContent = q.q;
-  sub.classList.remove("blink");
-  sub.textContent = `${idx+1} / ${QUESTIONS.length}`;
-
-  footer.innerHTML = "";
-  lockChoices(false);
-
-  q.a.forEach((label, optIndex) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = label;
-    b.onclick = () => onAnswer(optIndex);
-    footer.appendChild(b);
-  });
-}
-
-function nextQuestion(){
-  idx++;
-  if(idx >= QUESTIONS.length){
-    showResult();
-    return;
-  }
-  // 次の問題は “今居るキャラのまま” 表示（居座り仕様）
-  renderQuestion();
-}
-
-function showSpeakerLine(charName){
-  lockChoices(true);
-
-  if(charName === "lion"){
-    // ライオン丸：特別演出 → 自動で進まない（タップで進む）
-    mode = "lion_wait";
-    dim.classList.add("show");
-    setChar("lion", true);
-    startTalkAnim("lion", 220); // ちょいゆっくり目で“重い感じ”
-
-    text.textContent = "ザ・トーマレ！";
-    sub.classList.remove("blink");
-    sub.textContent = "";
-
-    setTimeout(() => {
-      text.textContent = "ザ・トーマレ！\n時を止めてから拍手";
-      try{
-        const p = clap.play();
-        if(p && typeof p.catch === "function") p.catch(()=>{});
-      }catch(e){}
-      stopAnim(); // ここで静止（時が止まった感じ）
-      sub.classList.add("blink");
-      sub.textContent = "タップして続ける";
-    }, 400);
-
-    return;
-  }
-
-  // 通常キャラ：一言中だけ2コマで口パク → 次へ（キャラは居座る）
-  setChar(charName, true);
-  startTalkAnim(charName, 160);
-
-  const lines = CHAR[charName].say;
-  text.textContent = lines[Math.floor(Math.random() * lines.length)];
-  sub.classList.remove("blink");
-  sub.textContent = "";
-
-  setTimeout(() => {
-    stopAnim();
-    // “居座り”なので最後のフレームのまま残す（=少し表情変化が残る）
-    nextQuestion();
-  }, 720);
-}
-
-function onAnswer(optIndex){
-  if(SCORE[idx] && typeof SCORE[idx][optIndex] === "number"){
-    score += SCORE[idx][optIndex];
-  }
-  const speaker = pickSpeaker();
-  showSpeakerLine(speaker);
-}
-
-function showResult(){
-  if(!consumeOnce()){
-    showLimit();
-    return;
-  }
-  updateQuota();
-  mode = "result";
-  lockChoices(true);
-  dim.classList.remove("show");
-
-  // 結果画面は必ずデカブサ
-  setChar("dekabusa", true);
-
-  let result;
-  if(score >= 9) result = "今日は\n割と動ける\n\nでも無理はするな";
-  else if(score >= 5) result = "今日は\n普通\n\nだいたい普通";
-  else result = "今日は\n無\n\nやらなくていい";
-
-  text.textContent = result;
-  sub.classList.remove("blink");
-  sub.textContent = "今日は、そういう日だ";
-}
-
-/* ===== tap behavior ===== */
-mainEl.addEventListener("click", () => {
-  if(mode === "intro"){
-    if(!IS_DEBUG && remainCount() <= 0){
-      showLimit();
-      return;
+      // 少し待って遷移
+      setTimeout(() => {
+        location.href = NEXT_URL;
+      }, FADE_MS);
     }
-    sub.classList.remove("blink");
-    nextQuestion();
-    return;
-  }
 
-  if(mode === "lion_wait"){
-    // タップで続ける：暗転解除→デカブサへ戻す→次の質問
-    dim.classList.remove("show");
-    sub.classList.remove("blink");
-    sub.textContent = "";
-    stopAnim();
-    setChar("dekabusa", true);
-    nextQuestion();
-    return;
-  }
-});
+    btnStart.addEventListener("click", (e) => {
+      e.stopPropagation();
+      goNext();
+    });
 
-/* ===== start ===== */
-updateQuota();
-showIntro();
-</script>
+    // 画面タップでも開始（シンプルに）
+    document.addEventListener("click", (e) => {
+      // ボタン押下は上で処理済み
+      if (e.target === btnStart) return;
+      goNext();
+    }, { passive:true });
+  </script>
 </body>
 </html>
