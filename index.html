@@ -14,7 +14,7 @@
       --muted2:#9a9a9a;
       --accent:#ffd400;
 
-      --footer-h: 92px;
+      --footer-h: 112px; /* 4択にするので少し増やす */
       --char-w: 240px;
       --char-gap: 12px;
 
@@ -81,7 +81,7 @@
 
     main{
       padding: 18px 18px calc(var(--footer-h) + 16px);
-      min-height: 560px; /* iPhone 13 Proでも間延びしない */
+      min-height: 560px;
       position: relative;
       text-align:center;
     }
@@ -150,8 +150,6 @@
       0%,100%{ transform: translateY(0px) rotate(-0.2deg); }
       50%    { transform: translateY(-6px) rotate(0.2deg); }
     }
-
-    /* “瞬きっぽい” */
     .blinkSim{ animation: blinkSim 6.8s infinite; }
     @keyframes blinkSim{
       0%, 95%, 100% { filter:none; }
@@ -177,9 +175,8 @@
       background:#fafafa;
       color:#111;
       border-radius: 18px;
-      padding:16px 26px;
-      font-size:18px;
-      min-width:160px;
+      padding:14px 14px;
+      font-size:16px;
       cursor:pointer;
       transition: transform .12s ease, opacity .12s ease;
     }
@@ -194,6 +191,8 @@
       border-radius: 28px;
       min-width: 220px;
       letter-spacing:.12em;
+      padding:16px 26px;
+      font-size:18px;
     }
     .locked button{
       opacity:.35;
@@ -213,7 +212,7 @@
       margin: 18px 0 0;
       font-size: clamp(18px, 5.6vw, 28px);
       line-height: 1.45;
-      letter-spacing: .06em;
+      letter-spacing:.06em;
       white-space: pre-line;
       min-height: 3.2em;
     }
@@ -239,7 +238,7 @@
       transform: translateY(0);
     }
 
-    /* キャラ常駐 */
+    /* キャラ常駐（質問中のみ） */
     #charImg{
       position:absolute;
       right: var(--char-gap);
@@ -254,13 +253,15 @@
     /* ====== 結果 ====== */
     #calcArea, #resultArea{ display:none; }
     #calcText{
-      margin-top: 110px;
+      margin-top: 90px;
       color:#666;
       letter-spacing:.08em;
       font-size: 16px;
     }
+
+    /* b案：上の空きを使う（%を上寄せ） */
     #percentBig{
-      margin-top: 70px;
+      margin-top: 18px;
       font-size: 64px;
       font-weight: 800;
       letter-spacing: .06em;
@@ -273,18 +274,47 @@
       letter-spacing: .08em;
     }
     #resultLines{
-      margin-top: 14px;
+      margin-top: 12px;
       white-space: pre-line;
       font-size: 16px;
       line-height: 1.9;
       color:#111;
     }
     #tapBack{
-      margin-top: 18px;
+      margin-top: 14px;
       color: var(--muted2);
       font-size: 12px;
       letter-spacing: .08em;
       user-select:none;
+    }
+
+    /* 結果中は“結果エリア内”にキャラを置く（被り防止） */
+    #resultChar{
+      width: min(260px, 66%);
+      height:auto;
+      display:block;
+      margin: 14px auto 0;
+      opacity: .98;
+      user-select:none;
+      pointer-events:none;
+    }
+
+    /* ====== 4択フッター ====== */
+    .grid4{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      width: 100%;
+      max-width: 520px;
+      padding: 0 8px;
+    }
+    .grid4 button{
+      width: 100%;
+      min-width: 0;
+      padding: 14px 10px;
+      border-radius: 18px;
+      font-size: 15px;
+      letter-spacing:.04em;
     }
 
     /* ====== 仲間紹介（モーダル） ====== */
@@ -399,12 +429,12 @@
     }
 
     @media (max-width: 420px){
-      :root{ --char-w: 220px; }
+      :root{ --char-w: 220px; --footer-h: 118px; }
       main{ min-height: 520px; }
-      button{ min-width: 140px; }
       .primary{ min-width: 200px; }
       #percentBig{ font-size: 58px; }
       .heroShadow{ width: 320px; }
+      .grid4 button{ font-size: 14px; padding: 13px 10px; }
     }
     @media (prefers-reduced-motion: reduce){
       #topDeka, .tapHint{ animation:none!important; }
@@ -439,8 +469,6 @@
             <div class="heroShadow"></div>
             <img id="topDeka" class="blinkSim" src="dekabusa.png" alt="デカブサ">
           </div>
-
-          <div class="miniNote">※当たったと思っても外れています</div>
         </section>
 
         <!-- ===== GAME ===== -->
@@ -457,10 +485,15 @@
             <div id="percentBig">0%</div>
             <div style="margin-top:10px;color:#666;letter-spacing:.12em;font-size:12px;">今日の運勢</div>
             <div id="rankText"></div>
+
+            <!-- 結果中のキャラ（被り防止） -->
+            <img id="resultChar" src="" alt="キャラ">
+
             <div id="resultLines"></div>
             <div id="tapBack">タップでトップへ</div>
           </div>
 
+          <!-- 質問中の常駐キャラ -->
           <img id="charImg" src="" alt="キャラ">
         </section>
 
@@ -471,9 +504,13 @@
         <button id="btnStart" class="primary" type="button">START</button>
       </footer>
 
-      <footer id="footerGame" class="" style="display:none;">
-        <button id="btnYes" type="button">はい</button>
-        <button id="btnNo" type="button">いいえ</button>
+      <footer id="footerGame" style="display:none;">
+        <div class="grid4">
+          <button id="btnA" type="button">信じる</button>
+          <button id="btnB" type="button">信じない</button>
+          <button id="btnC" type="button">スクショして自慢</button>
+          <button id="btnD" type="button">見なかったことにする</button>
+        </div>
       </footer>
 
     </div>
@@ -529,18 +566,44 @@
       { id:"lion",    name:"ライオン丸", img:"lionmaru.png", desc:"……黙って見ろ。" },
       { id:"namaken", name:"ナマケン",   img:"namaken.png",  desc:"…うん…まあ…" },
       { id:"tora",    name:"とらさん",   img:"torasan.png",  desc:"よし。次いくか。" },
-      // ※カバオは出さない方針なら、この行は消してOK
-      // { id:"kaba",    name:"カバオ",     img:"kabao.png",    desc:"水だ。まあまあ。" },
       { id:"kane",    name:"カンえもん", img:"kaneemon.png", desc:"（入ってる）三次元だ。" },
     ];
 
-    // ========= キャラ一言（回答後に出すだけ） =========
-    const LINES = {
-      dekabusa: ["まあそうだな","うん","知らん","そういう日だ","気にするな","次","いいんじゃない"],
-      lion: ["……","よかろう","悪くない","うむ","まあな","次だ","黙って見ろ"],
-      namaken: ["…うん","…まあ","…そう","…いい","…次","…知らん","…だるい"],
-      tora: ["よし","ふむ","なるほど","悪くない","次いくか","まあいい","気にするな"],
-      kane: ["（入ってる）","三次元だ","普通だ","次","まあな","気にするな","うん"]
+    // ========= 4択（固定でOK。後で質問ごとに差し替えも可） =========
+    const CHOICES = ["信じる","信じない","スクショして自慢","見なかったことにする"];
+
+    // ========= 4択リアクション（選択肢で変える） =========
+    const REACTION = {
+      dekabusa: {
+        "信じる":"へぇ…（信じるんだ）",
+        "信じない":"賢い",
+        "スクショして自慢":"やめとけ",
+        "見なかったことにする":"それが正解",
+      },
+      lion: {
+        "信じる":"……好きにしろ",
+        "信じない":"よかろう",
+        "スクショして自慢":"黙ってしまえ",
+        "見なかったことにする":"うむ",
+      },
+      namaken: {
+        "信じる":"…うん…",
+        "信じない":"…まあ…",
+        "スクショして自慢":"…だるい…",
+        "見なかったことにする":"…それで…",
+      },
+      tora: {
+        "信じる":"よし",
+        "信じない":"なるほど",
+        "スクショして自慢":"ほどほどにな",
+        "見なかったことにする":"気にするな",
+      },
+      kane: {
+        "信じる":"（入ってる）",
+        "信じない":"三次元だ",
+        "スクショして自慢":"普通だ",
+        "見なかったことにする":"まあな",
+      }
     };
 
     // ========= 質問プール（全混ぜ） =========
@@ -614,9 +677,14 @@
     const progressEl = document.getElementById("progress");
     const questionEl = document.getElementById("question");
     const bubbleEl   = document.getElementById("bubble");
-    const btnYes     = document.getElementById("btnYes");
-    const btnNo      = document.getElementById("btnNo");
+
+    const btnA = document.getElementById("btnA");
+    const btnB = document.getElementById("btnB");
+    const btnC = document.getElementById("btnC");
+    const btnD = document.getElementById("btnD");
+
     const charImg    = document.getElementById("charImg");
+    const resultChar = document.getElementById("resultChar");
 
     const calcArea   = document.getElementById("calcArea");
     const resultArea = document.getElementById("resultArea");
@@ -681,7 +749,6 @@
     // ========= START（強制キャラ選択） =========
     const btnStart = document.getElementById("btnStart");
     function goStartFlow(){
-      // フェードは軽く
       fade.classList.add("on");
       setTimeout(()=>{
         fade.classList.remove("on");
@@ -689,12 +756,7 @@
       }, 220);
     }
     btnStart.addEventListener("click", (e)=>{ e.stopPropagation(); goStartFlow(); });
-
-    // TOPのどこタップでもSTART（ボタンが主だけど便利）
-    document.getElementById("screenTop").addEventListener("click", (e)=>{
-      // 連打防止っぽく軽く
-      goStartFlow();
-    }, { passive:true });
+    document.getElementById("screenTop").addEventListener("click", ()=>{ goStartFlow(); }, { passive:true });
 
     // ========= ゲーム本体 =========
     let selectedCharId = null;
@@ -703,22 +765,38 @@
     let results = [];
     let locked = false;
 
-    function sayLine(){
-      const pool = LINES[selectedCharId] || LINES.dekabusa;
-      return pool[Math.floor(Math.random()*pool.length)];
+    // 4択表示（今は固定。後で質問ごとに変えたいならここを差し替える）
+    function renderChoices(){
+      btnA.textContent = CHOICES[0];
+      btnB.textContent = CHOICES[1];
+      btnC.textContent = CHOICES[2];
+      btnD.textContent = CHOICES[3];
+    }
+
+    function reactionFor(choiceLabel){
+      const m = REACTION[selectedCharId] || REACTION.dekabusa;
+      return (m && m[choiceLabel]) ? m[choiceLabel] : "……";
     }
 
     function renderQuestion(){
       progressEl.textContent = `${idx+1} / 7`;
       questionEl.textContent = questions[idx];
+
       bubbleEl.classList.remove("on");
       bubbleEl.textContent = "";
+
       footerGame.classList.remove("locked");
       locked = false;
 
       // 結果表示/集計非表示
       calcArea.style.display = "none";
       resultArea.style.display = "none";
+
+      // 質問中は常駐キャラを出す、結果キャラは隠す
+      charImg.style.display = "";
+      resultChar.style.display = "none";
+
+      renderChoices();
     }
 
     function lockButtons(){
@@ -728,7 +806,7 @@
 
     function waitMs(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
-    async function onAnswer(){
+    async function onAnswer(choiceLabel){
       if(locked) return;
       lockButtons();
 
@@ -736,8 +814,8 @@
       const v = Math.floor(Math.random() * 101);
       results.push(v);
 
-      // 一言
-      bubbleEl.textContent = sayLine();
+      // 選択肢に応じた一言
+      bubbleEl.textContent = reactionFor(choiceLabel);
       bubbleEl.classList.add("on");
 
       await waitMs(650);
@@ -750,11 +828,12 @@
       }
     }
 
-    btnYes.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
-    btnNo.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
+    btnA.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(btnA.textContent); });
+    btnB.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(btnB.textContent); });
+    btnC.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(btnC.textContent); });
+    btnD.addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(btnD.textContent); });
 
     async function finish(){
-      // UI
       footerGame.classList.add("locked");
       locked = true;
 
@@ -765,12 +844,20 @@
       calcArea.style.display = "block";
       resultArea.style.display = "none";
 
+      // 結果中は常駐キャラを隠す（被り防止）
+      charImg.style.display = "none";
+
       await waitMs(800);
 
       const avg = Math.floor(results.reduce((a,b)=>a+b,0) / results.length);
 
       calcArea.style.display = "none";
       resultArea.style.display = "block";
+
+      // 結果キャラを表示（結果エリア内）
+      resultChar.src = charImg.src;
+      resultChar.alt = "キャラ";
+      resultChar.style.display = "";
 
       percentBig.textContent = "0%";
       rankText.textContent = "";
@@ -783,7 +870,7 @@
       const lines = RESULT_LINES[rank] || ["今日はそんな日。","気にするな。"];
       resultLines.textContent = lines.join("\n");
 
-      // タップでトップへ（強制選択なので毎回TOPから）
+      // タップでトップへ
       const main = document.getElementById("main");
       const once = () => {
         main.removeEventListener("click", once);
@@ -814,10 +901,9 @@
       const c = CHAR_LIST[pickIndex];
       selectedCharId = c.id;
 
-      // 保存（必要なら後で参照できる）
       localStorage.setItem("selectedCharacter", selectedCharId);
 
-      // キャラ画像セット（ゲーム中ずっと表示）
+      // キャラ画像セット（質問中は右下常駐）
       charImg.src = c.img;
 
       closeModal();
@@ -827,7 +913,6 @@
       idx = 0;
       results = [];
 
-      // 画面切替（軽くフェード）
       fade.classList.add("on");
       setTimeout(()=>{
         fade.classList.remove("on");
@@ -837,10 +922,7 @@
     });
 
     // モーダル外クリックは閉じない（強制選択）
-    modalBack.addEventListener("click", (e)=>{
-      // 何もしない
-      e.stopPropagation();
-    });
+    modalBack.addEventListener("click", (e)=>{ e.stopPropagation(); });
 
     // ========= 起動 =========
     showTop();
