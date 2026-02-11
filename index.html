@@ -21,7 +21,6 @@
 }
 
 *{ box-sizing:border-box; }
-
 body{
   margin:0;
   font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
@@ -29,7 +28,6 @@ body{
   background: var(--bg);
   color: var(--text);
 }
-
 .wrap{
   min-height: 100svh;
   display:flex;
@@ -37,7 +35,6 @@ body{
   justify-content:center;
   padding: 18px;
 }
-
 .card{
   width: min(680px, 100%);
   background: var(--card);
@@ -46,7 +43,6 @@ body{
   overflow:hidden;
   position: relative;
 }
-
 header{
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
@@ -55,21 +51,18 @@ header{
   justify-content: space-between;
   gap:10px;
 }
-
 .headLeft{
   display:flex;
   align-items:center;
   gap:10px;
   min-width: 0;
 }
-
 .dot{
   width:10px; height:10px;
   border-radius:50%;
   background: var(--accent);
   flex: 0 0 auto;
 }
-
 h1{
   font-size:14px;
   font-weight:700;
@@ -78,21 +71,18 @@ h1{
   color:var(--muted);
   white-space: nowrap;
 }
-
 #quota{
   font-size: 12px;
   color: #9a9a9a;
   letter-spacing: .08em;
   white-space: nowrap;
 }
-
 main{
   padding: var(--text-top-pad) 18px calc(var(--footer-h) + 18px);
   text-align:center;
   min-height: 520px;
   position: relative;
 }
-
 #text{
   white-space: pre-line;
   font-size: clamp(28px, 4.6vw, 36px);
@@ -101,7 +91,6 @@ main{
   margin: 0;
   text-align: center;
 }
-
 #sub{
   margin: 20px 0 0;
   font-size: 14px;
@@ -112,11 +101,7 @@ main{
   text-align: center;
   line-height: 1.9;
 }
-
-/* 点滅（タップ誘導） */
-.blink{
-  animation: blinkFade 1.2s ease-in-out infinite;
-}
+.blink{ animation: blinkFade 1.2s ease-in-out infinite; }
 @keyframes blinkFade{
   0%,100%{ opacity: 0.25; }
   50%    { opacity: 1; }
@@ -132,7 +117,6 @@ footer{
   align-items:center;
   padding: 14px;
 }
-
 button{
   appearance:none;
   border:1px solid var(--line);
@@ -144,12 +128,10 @@ button{
   cursor:pointer;
   transition: opacity .15s ease;
 }
-
 button:active{
   transform: translateY(1px);
   background:#f2f2f2;
 }
-
 footer.locked button{
   opacity: .35;
   cursor: default;
@@ -165,30 +147,8 @@ footer.locked button{
   opacity: .98;
   pointer-events:none;
   user-select:none;
-  transform-origin: 70% 85%;
 }
 
-/* 軽い演出：ナマケン/カンえもん */
-.char-pop{
-  animation: pop 260ms ease-out;
-}
-@keyframes pop{
-  0%   { transform: scale(1); }
-  60%  { transform: scale(1.06); }
-  100% { transform: scale(1); }
-}
-.char-wobble{
-  animation: wobble 520ms ease-in-out;
-}
-@keyframes wobble{
-  0%   { transform: rotate(0deg) translateY(0px); }
-  25%  { transform: rotate(-1.8deg) translateY(-1px); }
-  50%  { transform: rotate( 1.8deg) translateY(0px); }
-  75%  { transform: rotate(-1.0deg) translateY(1px); }
-  100% { transform: rotate(0deg) translateY(0px); }
-}
-
-/* ライオン丸用：軽い暗転 */
 .dim{
   position:absolute;
   inset:0;
@@ -219,7 +179,7 @@ footer.locked button{
 
     <footer id="choices" class="locked"></footer>
 
-    <img id="charaImg" class="character" src="dekabusa.png" alt="character">
+    <img id="charaImg" class="character" src="dekabusa_1.png" alt="character">
     <div id="dim" class="dim"></div>
 
     <audio id="clap" src="clap.mp3" preload="auto"></audio>
@@ -227,23 +187,16 @@ footer.locked button{
 </div>
 
 <script>
-/* =====================
-   デバッグ（?debug=1）
-===================== */
+/* ===== debug (?debug=1) ===== */
 const params = new URLSearchParams(location.search);
 const IS_DEBUG = params.get("debug") === "1";
 
-/* =====================
-   回数制限（1日3回）
-   ※debug=1 は無制限
-===================== */
+/* ===== daily limit ===== */
 const DAILY_LIMIT = 3;
 const KEY_DATE="dekabusa_date";
 const KEY_COUNT="dekabusa_count";
 
-function todayKey(){
-  return new Date().toLocaleDateString("ja-JP");
-}
+function todayKey(){ return new Date().toLocaleDateString("ja-JP"); }
 function loadCount(){
   const t = todayKey();
   const d = localStorage.getItem(KEY_DATE);
@@ -255,12 +208,12 @@ function loadCount(){
   return isNaN(c) ? 0 : c;
 }
 function remainCount(){
-  if(IS_DEBUG) return DAILY_LIMIT; // 表示は通常のまま
+  if(IS_DEBUG) return DAILY_LIMIT;
   const c = loadCount();
   return Math.max(0, DAILY_LIMIT - Math.min(c, DAILY_LIMIT));
 }
 function consumeOnce(){
-  if(IS_DEBUG) return true; // デバッグは消費しない
+  if(IS_DEBUG) return true;
   const c = loadCount();
   if(c >= DAILY_LIMIT) return false;
   localStorage.setItem(KEY_COUNT, String(c + 1));
@@ -271,20 +224,15 @@ function updateQuota(){
   quota.textContent = (r <= 0) ? "今日はもう終わりです" : `今日はあと${r}回`;
 }
 
-/* =====================
-   イントロ（数字は固定）
-   出現率だけ 5% / 95%
-===================== */
+/* ===== intro ===== */
 function pickIntro(){
-  const rare = Math.random() < 0.05; // ちょい出やすく（5%）
+  const rare = Math.random() < 0.05;
   return rare
     ? "あなたの運勢はどう？\n\n2%の人が\n当たったと解答"
     : "あなたの運勢はどう？\n\n98%の人が\n外れたと解答";
 }
 
-/* =====================
-   7問（デカブサ世界っぽく）
-===================== */
+/* ===== questions (デカブサ世界っぽく) ===== */
 const QUESTIONS = [
   { q:"朝。\n最初にすることは？", a:["とりあえず起きる","起きた体にする","まだ夜の続き","今じゃない"] },
   { q:"やることが増えた。\nどうする？", a:["一個だけやる","検討はした","永久に保留","見なかった"] },
@@ -294,8 +242,6 @@ const QUESTIONS = [
   { q:"外がうるさい。\n対処は？", a:["耐える","耳栓","逃げる","心を無にする"] },
   { q:"最後に。\n今日の方針は？", a:["無理しない","普通","無","今日はそういう日"] },
 ];
-
-/* スコア（雑でOK）：左ほど“動く”、右ほど“動かない” */
 const SCORE = [
   [2,1,0,0],
   [2,1,0,0],
@@ -306,17 +252,14 @@ const SCORE = [
   [0,0,0,0],
 ];
 
-/* =====================
-   キャラ（居座り仕様）
-   - ナマケン/カンえもん：次の回答まで居座る
-   - ライオン丸：特別演出後「タップで進む」→ 進む時にデカブサへ戻る
-   - 結果画面：必ずデカブサ
-===================== */
+/* ===== characters (2コマ) =====
+   frames: [1,2]
+*/
 const CHAR = {
-  dekabusa: { img:"dekabusa.png", say:["まあ、そうだな","無理すんな","続けよう","今はそれでいい","だいたいそんなもんだ"] },
-  namaken:  { img:"namaken.png",  say:["あとでいい","急ぐな","寝てもいい","そのうち","まあ…"] },
-  kanemon:  { img:"kanemon.png",  say:["まあ入る","持っとくか","使わないかも","入れとく","とりあえず"] },
-  lion:     { img:"lionmaru.png", special:true },
+  dekabusa: { frames:["dekabusa_1.png","dekabusa_2.png"], say:["まあ、そうだな","無理すんな","続けよう","今はそれでいい","だいたいそんなもんだ"] },
+  namaken:  { frames:["namaken_1.png","namaken_2.png"],   say:["あとでいい","急ぐな","寝てもいい","そのうち","まあ…"] },
+  kanemon:  { frames:["kanemon_1.png","kanemon_2.png"],   say:["まあ入る","持っとくか","使わないかも","入れとく","とりあえず"] },
+  lion:     { frames:["lionmaru_1.png","lionmaru_2.png"], special:true },
 };
 
 /* 出現率：デカ75 / ナマ10 / カン10 / ライオン5 */
@@ -328,9 +271,7 @@ function pickSpeaker(){
   return "lion";
 }
 
-/* =====================
-   DOM
-===================== */
+/* ===== DOM ===== */
 const mainEl = document.getElementById("main");
 const text = document.getElementById("text");
 const sub  = document.getElementById("sub");
@@ -340,40 +281,50 @@ const charaImg = document.getElementById("charaImg");
 const dim = document.getElementById("dim");
 const clap = document.getElementById("clap");
 
-/* =====================
-   進行状態
-===================== */
+/* ===== 2コマアニメ制御 ===== */
+let currentChar = "dekabusa";
+let frameIdx = 0;
+let animTimer = null;
+
+function stopAnim(){
+  if(animTimer){
+    clearInterval(animTimer);
+    animTimer = null;
+  }
+}
+function setChar(name, forceFrame0=true){
+  currentChar = name;
+  stopAnim();
+  if(forceFrame0) frameIdx = 0;
+  charaImg.src = CHAR[name].frames[frameIdx];
+}
+function startTalkAnim(name, intervalMs=180){
+  // セリフ中だけパタパタ
+  stopAnim();
+  currentChar = name;
+  // 今のフレームから開始
+  animTimer = setInterval(() => {
+    frameIdx = 1 - frameIdx;
+    charaImg.src = CHAR[name].frames[frameIdx];
+  }, intervalMs);
+}
+
+/* ===== state ===== */
 let mode = "intro"; // intro | q | result | limit | lion_wait
 let idx = -1;
 let score = 0;
 
-let currentChar = "dekabusa";
-function setChar(name){
-  currentChar = name;
-  charaImg.src = CHAR[name].img;
-}
 function lockChoices(locked){
   if(locked) footer.classList.add("locked");
   else footer.classList.remove("locked");
 }
-function clearCharFx(){
-  charaImg.classList.remove("char-pop","char-wobble");
-}
-function applyCharFx(kind){
-  clearCharFx();
-  // reflowでアニメ再発火
-  void charaImg.offsetWidth;
-  if(kind) charaImg.classList.add(kind);
-}
 
-/* =====================
-   表示関数
-===================== */
+/* ===== screens ===== */
 function showLimit(){
   mode = "limit";
   lockChoices(true);
-  setChar("dekabusa");
   dim.classList.remove("show");
+  setChar("dekabusa", true);
   text.textContent = "今日は\nもうこれくらいです\n\nまた明日";
   sub.classList.remove("blink");
   sub.textContent = "";
@@ -389,8 +340,8 @@ function showIntro(){
   mode = "intro";
   idx = -1;
   score = 0;
-  setChar("dekabusa");
   dim.classList.remove("show");
+  setChar("dekabusa", true);
 
   text.textContent = pickIntro();
   sub.classList.add("blink");
@@ -426,31 +377,31 @@ function nextQuestion(){
     showResult();
     return;
   }
-  // 次の問題は「今居るキャラのまま」表示される（居座り仕様）
+  // 次の問題は “今居るキャラのまま” 表示（居座り仕様）
   renderQuestion();
 }
 
-/* 回答後のキャラ台詞（居座り） */
 function showSpeakerLine(charName){
+  lockChoices(true);
+
   if(charName === "lion"){
     // ライオン丸：特別演出 → 自動で進まない（タップで進む）
     mode = "lion_wait";
-    setChar("lion");
-    lockChoices(true);
-
     dim.classList.add("show");
+    setChar("lion", true);
+    startTalkAnim("lion", 220); // ちょいゆっくり目で“重い感じ”
+
     text.textContent = "ザ・トーマレ！";
     sub.classList.remove("blink");
     sub.textContent = "";
 
     setTimeout(() => {
       text.textContent = "ザ・トーマレ！\n時を止めてから拍手";
-      // 拍手SE（無くても落ちない）
       try{
         const p = clap.play();
         if(p && typeof p.catch === "function") p.catch(()=>{});
       }catch(e){}
-      // ここで進行を止める：タップ待ち
+      stopAnim(); // ここで静止（時が止まった感じ）
       sub.classList.add("blink");
       sub.textContent = "タップして続ける";
     }, 400);
@@ -458,52 +409,42 @@ function showSpeakerLine(charName){
     return;
   }
 
-  // 通常キャラ：軽い演出＋一言 → 少し待って次へ（キャラはそのまま居座る）
-  setChar(charName);
-  lockChoices(true);
-
-  // 演出（ナマケン/カンえもんは少し目立たせる）
-  if(charName === "namaken") applyCharFx("char-wobble");
-  else if(charName === "kanemon") applyCharFx("char-pop");
-  else clearCharFx();
+  // 通常キャラ：一言中だけ2コマで口パク → 次へ（キャラは居座る）
+  setChar(charName, true);
+  startTalkAnim(charName, 160);
 
   const lines = CHAR[charName].say;
-  const line = lines[Math.floor(Math.random() * lines.length)];
-  text.textContent = line;
+  text.textContent = lines[Math.floor(Math.random() * lines.length)];
   sub.classList.remove("blink");
   sub.textContent = "";
 
   setTimeout(() => {
+    stopAnim();
+    // “居座り”なので最後のフレームのまま残す（=少し表情変化が残る）
     nextQuestion();
-  }, 700);
+  }, 720);
 }
 
 function onAnswer(optIndex){
-  // スコア加算（適当）
   if(SCORE[idx] && typeof SCORE[idx][optIndex] === "number"){
     score += SCORE[idx][optIndex];
   }
-
-  // 次の“発言者”を抽選して喋らせる
   const speaker = pickSpeaker();
   showSpeakerLine(speaker);
 }
 
 function showResult(){
-  // 結果表示時に回数消費（debugは消費しない）
   if(!consumeOnce()){
     showLimit();
     return;
   }
   updateQuota();
-
   mode = "result";
   lockChoices(true);
+  dim.classList.remove("show");
 
   // 結果画面は必ずデカブサ
-  setChar("dekabusa");
-  clearCharFx();
-  dim.classList.remove("show");
+  setChar("dekabusa", true);
 
   let result;
   if(score >= 9) result = "今日は\n割と動ける\n\nでも無理はするな";
@@ -515,11 +456,8 @@ function showResult(){
   sub.textContent = "今日は、そういう日だ";
 }
 
-/* =====================
-   操作：タップ進行
-===================== */
+/* ===== tap behavior ===== */
 mainEl.addEventListener("click", () => {
-  // intro → start
   if(mode === "intro"){
     if(!IS_DEBUG && remainCount() <= 0){
       showLimit();
@@ -530,23 +468,19 @@ mainEl.addEventListener("click", () => {
     return;
   }
 
-  // ライオン丸：ここでだけ「タップで続ける」
   if(mode === "lion_wait"){
-    // 暗転解除し、デカブサへ戻して次へ
+    // タップで続ける：暗転解除→デカブサへ戻す→次の質問
     dim.classList.remove("show");
     sub.classList.remove("blink");
     sub.textContent = "";
-
-    setChar("dekabusa"); // ライオン丸は居座らない
-    clearCharFx();
+    stopAnim();
+    setChar("dekabusa", true);
     nextQuestion();
     return;
   }
 });
 
-/* =====================
-   起動
-===================== */
+/* ===== start ===== */
 updateQuota();
 showIntro();
 </script>
