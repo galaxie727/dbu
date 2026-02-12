@@ -6,15 +6,19 @@
 <title>結果</title>
 
 <style>
+html, body{
+  margin:0;
+  background:#ffffff; /* ←ここを完全白に */
+  font-family:sans-serif;
+  width:100%;
+  height:100%;
+}
 
 body{
-  margin:0;
-  background:#f4f4f4;
-  font-family:sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
+  min-height:100vh; /* iPhone対策 */
 }
 
 .wrapper{
@@ -24,7 +28,6 @@ body{
 }
 
 /* ===== 結果テキスト ===== */
-
 .resultText{
   font-size:22px;
   margin-bottom:10px;
@@ -36,16 +39,17 @@ body{
   line-height:1.5;
 }
 
-/* ===== ナマケン ===== */
-
+/* ===== カンえもん ===== */
 #namaken{
   width:220px;
   margin-top:20px;
   transition:opacity 0.15s;
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 /* ===== ボタン ===== */
-
 .retryBtn{
   margin-top:30px;
   padding:12px 30px;
@@ -59,11 +63,10 @@ body{
 .retryBtn:active{
   transform:scale(0.95);
 }
-
 </style>
 </head>
-<body>
 
+<body>
 <div class="wrapper">
 
   <div class="resultText">
@@ -75,9 +78,7 @@ body{
     外れたと回答
   </div>
 
-  <img id="namaken" src="kanemon_1.png">
-
-  <br>
+  <img id="namaken" src="kanemon_1.png" alt="カンえもん">
 
   <button class="retryBtn" onclick="location.reload()">
     もう一度見る
@@ -86,11 +87,9 @@ body{
 </div>
 
 <script>
-
 const img = document.getElementById("namaken");
 
 /* ===== 静→動→静→動→静 ===== */
-
 const sequence = [
   "kanemon_1.png",
   "kanemon_2.png",
@@ -102,9 +101,7 @@ const sequence = [
 let index = 0;
 
 function playSequence(){
-
   if(index < sequence.length){
-
     img.style.opacity = 0;
 
     setTimeout(()=>{
@@ -112,19 +109,13 @@ function playSequence(){
       img.style.opacity = 1;
 
       index++;
-
       setTimeout(playSequence, 350);
-
     },150);
-
   }
-
 }
 
 /* ===== 少し遅れて開始 ===== */
-
 setTimeout(playSequence, 500);
-
 </script>
 
 </body>
