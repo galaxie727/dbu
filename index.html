@@ -1,4 +1,1148 @@
-<!doctype html>
+<!doctype html><!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>デカブサ占い</title>
+  <style>
+    :root{
+      --bg:#f7f7f7;
+      --card:#ffffff;
+      --line:#e6e6e6;
+      --text:#111;
+      --muted:#666;
+      --muted2:#9a9a9a;
+      --accent:#ffd400;
+
+      --maxw:520px;
+      --btnH: 58px;
+      --safeB: env(safe-area-inset-bottom, 0px);
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap{
+      min-height: 100svh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+    }
+    .card{
+      width: min(var(--maxw), 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow:hidden;
+      position: relative;
+    }
+    header{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+    }
+    .headLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius:50%;
+      background: var(--accent);
+      flex:0 0 auto;
+    }
+    h1{
+      font-size:14px;
+      font-weight:700;
+      margin:0;
+      letter-spacing:.08em;
+      color:var(--muted);
+      white-space: nowrap;
+    }
+    #quota{
+      font-size: 12px;
+      color: var(--muted2);
+      letter-spacing: .08em;
+      white-space: nowrap;
+      user-select:none;
+    }
+
+    main{
+      padding: 18px;
+      min-height: 620px;
+    }
+
+    /* ====== TOP ====== */
+    .top{
+      text-align:center;
+      padding: 22px 10px 26px;
+    }
+    .topTitle{
+      margin-top: 6px;
+      font-size: clamp(20px, 5.8vw, 30px);
+      font-weight: 700;
+      letter-spacing:.06em;
+      line-height:1.45;
+    }
+    .topCopy{
+      margin-top: 18px;
+      font-size: clamp(26px, 7.2vw, 40px);
+      font-weight: 800;
+      letter-spacing:.06em;
+      line-height:1.25;
+      white-space: pre-line;
+    }
+    .tapHint{
+      margin: 18px 0 0;
+      font-size: 13px;
+      color: rgba(0,0,0,0.22);
+      letter-spacing: .14em;
+      user-select:none;
+      animation: hintBlink 1.25s ease-in-out infinite;
+    }
+    @keyframes hintBlink{
+      0%,100%{ opacity: .20; }
+      50%    { opacity: .90; }
+    }
+    .hero{
+      margin: 28px auto 0;
+      width: min(260px, 70%);
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+    }
+    #topImg{
+      width: 100%;
+      height:auto;
+      display:block;
+      transform-origin: 50% 100%;
+      animation: bob 3.6s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes bob{
+      0%,100%{ transform: translateY(0px) rotate(-0.2deg); }
+      50%    { transform: translateY(-6px) rotate(0.2deg); }
+    }
+    .miniNote{
+      margin-top: 14px;
+      font-size: 12px;
+      color: rgba(0,0,0,0.34);
+      letter-spacing: .06em;
+      line-height: 1.7;
+    }
+
+    /* ====== 共通ボタン ====== */
+    .footer{
+      border-top: 1px solid var(--line);
+      padding: 14px 12px calc(14px + var(--safeB));
+      background:#fff;
+    }
+    button{
+      appearance:none;
+      border:1px solid rgba(0,0,0,0.08);
+      background:#fafafa;
+      color:#111;
+      border-radius: 18px;
+      padding: 14px 18px;
+      font-size:18px;
+      cursor:pointer;
+      transition: transform .12s ease, opacity .12s ease;
+      min-height: var(--btnH);
+    }
+    button:active{
+      transform: translateY(1px) scale(0.99);
+      background:#f2f2f2;
+    }
+    .primary{
+      border:none;
+      background:#111;
+      color:#fff;
+      border-radius: 28px;
+      letter-spacing:.12em;
+      width: min(320px, 92%);
+      margin: 0 auto;
+      display:block;
+    }
+
+    /* ====== GAME ====== */
+    .game{
+      display:flex;
+      flex-direction:column;
+      min-height: 620px;
+      text-align:center;
+    }
+    #progress{
+      font-size: 12px;
+      color: var(--muted2);
+      letter-spacing:.14em;
+      margin: 6px 0 0;
+      user-select:none;
+    }
+    #question{
+      margin: 22px 0 0;
+      font-size: clamp(20px, 6.0vw, 30px);
+      line-height: 1.45;
+      letter-spacing: .06em;
+      white-space: pre-line;
+      min-height: 3.2em;
+    }
+    .spacer{
+      flex: 1 1 auto;
+      min-height: 18px;
+    }
+    .charBottom{
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+      padding: 6px 0 8px;
+    }
+    #charImg{
+      width: 240px;
+      height:auto;
+      user-select:none;
+      pointer-events:none;
+      transition: opacity 0.15s;
+    }
+    .answers{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 6px 6px;
+    }
+    .answers button{
+      width: 100%;
+      font-size: 18px;
+      border-radius: 18px;
+      background:#fff;
+      border:1px solid rgba(0,0,0,0.10);
+      min-height: 64px;
+    }
+    .answers.locked button{
+      opacity:.40;
+      pointer-events:none;
+    }
+
+    /* ====== RESULT ====== */
+    .result{
+      display:flex;
+      flex-direction:column;
+      min-height: 620px;
+      text-align:center;
+      padding: 6px 0 0;
+    }
+    .resultHead{
+      padding-top: 10px;
+    }
+    .resultTitle{
+      font-size: 18px;
+      margin: 0;
+      letter-spacing:.06em;
+      color:#111;
+    }
+    #percentBig{
+      margin-top: 16px;
+      font-size: 74px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      line-height: 1;
+    }
+    .subCap{
+      margin-top: 10px;
+      color:#666;
+      letter-spacing:.12em;
+      font-size:12px;
+    }
+    #rankText{
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing:.08em;
+    }
+    #resultLines{
+      margin-top: 12px;
+      white-space: pre-line;
+      font-size: 16px;
+      line-height: 1.9;
+      color:#111;
+      padding: 0 12px;
+    }
+
+    /* 複数運 */
+    .stats{
+      margin: 16px auto 0;
+      width: min(420px, 92%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background:#fff;
+      text-align:left;
+    }
+    .statRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 6px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .statRow:last-child{ border-bottom:none; }
+    .statName{
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing:.06em;
+      color:#111;
+      min-width: 5.5em;
+    }
+    .statRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width: 100%;
+      justify-content:flex-end;
+    }
+    .bar{
+      flex: 1 1 auto;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.08);
+      overflow:hidden;
+      max-width: 220px;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width: 0%;
+      background: #111;
+      border-radius: 999px;
+      transition: width .6s ease;
+    }
+    .statVal{
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing:.04em;
+      width: 3.2em;
+      text-align:right;
+    }
+
+    .retryWrap{ padding: 18px 0 8px; }
+    .retryBtn{
+      width: min(320px, 92%);
+      border:none;
+      background:#333;
+      color:#fff;
+      border-radius: 14px;
+      font-size: 18px;
+      min-height: 56px;
+    }
+
+    /* ====== Modal ====== */
+    .modalBack{
+      position: fixed;
+      inset:0;
+      background: rgba(0,0,0,0.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 999;
+    }
+    .modalBack.on{ display:flex; }
+    .modal{
+      width: min(520px, 100%);
+      background:#fff;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+    }
+    .modalTitle{
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing:.08em;
+      color: var(--muted);
+      margin:0;
+    }
+    .modalBody{
+      padding: 16px;
+      text-align:center;
+    }
+    .charStage{
+      margin-top: 6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+    .navBtn{
+      width:44px;
+      min-width:44px;
+      height:44px;
+      padding:0;
+      border-radius: 14px;
+      font-size: 18px;
+    }
+    .charCard{
+      width: min(320px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 12px 14px;
+      background: #fff;
+    }
+    .charName{
+      font-weight: 900;
+      letter-spacing:.08em;
+      margin: 6px 0 8px;
+    }
+    .charDesc{
+      color: var(--muted2);
+      font-size: 12px;
+      line-height: 1.7;
+      letter-spacing:.04em;
+      min-height: 3.4em;
+    }
+    .charPreview{
+      width: 220px;
+      height:auto;
+      display:block;
+      margin: 0 auto;
+    }
+    .modalFoot{
+      border-top: 1px solid var(--line);
+      padding: 12px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      background:#fff;
+    }
+
+    .fadeLayer{
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      transition: opacity .30s ease;
+    }
+    .fadeLayer.on{ opacity: 1; pointer-events: auto; }
+
+    @media (max-width: 420px){
+      main{ min-height: 560px; }
+      .game, .result{ min-height: 560px; }
+      #charImg{ width: 220px; }
+      #percentBig{ font-size: 64px; }
+      .answers button{ min-height: 62px; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      #topImg, .tapHint{ animation:none!important; }
+      .fadeLayer{ transition:none; }
+      .bar > i{ transition:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="fadeLayer" id="fade"></div>
+
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="headLeft">
+          <div class="dot"></div>
+          <h1>デカブサ占い</h1>
+        </div>
+        <div id="quota">今日はあと∞回</div>
+      </header>
+
+      <main id="main">
+
+        <!-- ===== TOP ===== -->
+        <section id="screenTop" class="top">
+          <div class="topTitle">あなたの運勢はどう？</div>
+          <div class="topCopy">98%の人が
+外れたと回答</div>
+          <div class="tapHint">タップして</div>
+
+          <div class="hero">
+            <img id="topImg" src="dekabusa.png" alt="デカブサ">
+          </div>
+
+          <div class="miniNote">※当たったと思っても外れています</div>
+        </section>
+
+        <!-- ===== GAME ===== -->
+        <section id="screenGame" class="game" style="display:none;">
+          <div id="progress">1 / 7</div>
+          <div id="question">読み込み中</div>
+
+          <div class="spacer"></div>
+
+          <!-- 質問時：キャラは下だけ -->
+          <div class="charBottom">
+            <img id="charImg" src="" alt="キャラ">
+          </div>
+
+          <div class="answers" id="answers">
+            <button type="button" data-a="0">当たった</button>
+            <button type="button" data-a="1">外れた</button>
+            <button type="button" data-a="2">知らん</button>
+            <button type="button" data-a="3">気のせい</button>
+          </div>
+        </section>
+
+        <!-- ===== RESULT ===== -->
+        <section id="screenResult" class="result" style="display:none;">
+          <div class="resultHead">
+            <p class="resultTitle">今日のあなたの運勢は</p>
+
+            <div id="percentBig">0%</div>
+
+            <div class="subCap">総合運</div>
+            <div id="rankText"></div>
+
+            <div id="resultLines"></div>
+
+            <!-- 複数運 -->
+            <div class="stats" id="statsBox" aria-label="詳細運勢">
+              <div class="statRow">
+                <div class="statName">金運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barMoney"></i></div>
+                  <div class="statVal" id="valMoney">0%</div>
+                </div>
+              </div>
+              <div class="statRow">
+                <div class="statName">恋愛運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barLove"></i></div>
+                  <div class="statVal" id="valLove">0%</div>
+                </div>
+              </div>
+              <div class="statRow">
+                <div class="statName">仕事運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barWork"></i></div>
+                  <div class="statVal" id="valWork">0%</div>
+                </div>
+              </div>
+              <div class="statRow">
+                <div class="statName">健康運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barHealth"></i></div>
+                  <div class="statVal" id="valHealth">0%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <!-- 結果：キャラは1体だけ（下） -->
+          <div class="charBottom" style="padding-bottom:0;">
+            <img id="resultChar" src="" alt="キャラ（結果）" style="width:220px; height:auto; transition:opacity 0.15s;">
+          </div>
+
+          <div class="retryWrap">
+            <button class="retryBtn" id="btnRetry" type="button">もう一度見る</button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ===== FOOTER ===== -->
+      <div class="footer" id="footerTop">
+        <button id="btnStart" class="primary" type="button">START</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== 仲間紹介モーダル（必ず選択） ===== -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="仲間紹介">
+      <div class="modalHead">
+        <p class="modalTitle">仲間紹介</p>
+        <div style="font-size:12px;color:#9a9a9a;letter-spacing:.08em;">必ず選択</div>
+      </div>
+
+      <div class="modalBody">
+        <div class="charStage">
+          <button class="navBtn" id="btnPrev" type="button">‹</button>
+
+          <div class="charCard">
+            <img id="pickImg" class="charPreview" src="dekabusa.png" alt="">
+            <div class="charName" id="pickName">デカブサ</div>
+            <div class="charDesc" id="pickDesc">まあ…やるだけやれ。</div>
+          </div>
+
+          <button class="navBtn" id="btnNext" type="button">›</button>
+        </div>
+
+        <div class="miniNote">
+          追加キャラは、表示と文言が変わるだけです。<br>
+          中身は変わりません。
+        </div>
+      </div>
+
+      <div class="modalFoot">
+        <button id="btnChoose" class="primary" type="button">このキャラにする</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= 画面 =========
+    const screenTop    = document.getElementById("screenTop");
+    const screenGame   = document.getElementById("screenGame");
+    const screenResult = document.getElementById("screenResult");
+    const footerTop    = document.getElementById("footerTop");
+    const fade         = document.getElementById("fade");
+
+    // ========= 仲間（画像名をここで管理） =========
+    // ★全員 静→動→静→動→静 をやるため、img2が無い場合は img1 を使う
+    const CHAR_LIST = [
+      { id:"dekabusa", name:"デカブサ",   img1:"dekabusa.png",  img2:null,             desc:"まあ…やるだけやれ。" },
+      { id:"lion",     name:"ライオン丸", img1:"lionmaru.png",  img2:null,             desc:"……黙って見ろ。" },
+      { id:"namaken",  name:"ナマケン",   img1:"namaken.png",   img2:null,             desc:"…うん…まあ…" },
+      { id:"tora",     name:"とらさん",   img1:"torasan.png",   img2:null,             desc:"よし。次いくか。" },
+      { id:"kane",     name:"カンえもん", img1:"kanemon_1.png", img2:"kanemon_2.png",  desc:"（入ってる）三次元だ。" },
+    ];
+
+    // ========= 質問プール（脱力寄り） =========
+    const Q = [
+      "今日は様子見したい？",
+      "深く考えたくない？",
+      "とりあえず寝たい？",
+      "早く帰りたい？",
+      "今はその時じゃないと思う？",
+      "気にするだけ損だと思う？",
+      "今日は静かに過ごしたい？",
+      "何もしない日も価値があると思う？",
+      "急ぐ必要はないと思う？",
+      "なんとかなると思う？",
+      "今日は面倒を避けたい？",
+      "動くより止まる方が楽？",
+      "結局、気のせいだと思う？"
+    ];
+    function pick7(){
+      const copy = [...Q];
+      const out = [];
+      while(out.length < 7 && copy.length){
+        const j = Math.floor(Math.random()*copy.length);
+        out.push(copy.splice(j,1)[0]);
+      }
+      return out;
+    }
+
+    // ========= ランク（あなたの指定） =========
+    // 0-20 絶不調 / 21-39 低調 / 40-60 静穏 / 61-79 好調 / 80-100 絶好調
+    function getRankKey(p){
+      if(p <= 20) return "bad";
+      if(p <= 39) return "low";
+      if(p <= 60) return "calm";
+      if(p <= 79) return "good";
+      return "great";
+    }
+
+    // ========= 結果文（キャラ別×ランク別：基本ユーモア） =========
+    // A方式：JS内に直書き
+    const TEXTS = {
+      dekabusa: {
+        bad: [
+          "今日は流れが悪い。\n何か始めても続かない。\nやらないという判断も正しい。\n壊さなければ十分だ。",
+          "今日はだいたいズレる。\n予定も気分も合わない。\n無理に合わせなくていい。\nそのまま休め。",
+          "今日は噛み合わない。\n珍しくない。\n止まっておけば被害は出ない。\n問題ない。",
+          "今日は空回りしやすい。\n動くほど疲れる。\n何もしないのも行動だ。\n気にするな。",
+          "今日は流れが濁っている。\n頑張ると余計に崩れる。\n止まっていれば大丈夫だ。\nまあ、そんな日だ。"
+        ],
+        low: [
+          "今日は少し噛み合わない。\n予定はだいたいズレる。\nまあ珍しくない。\n気にするな。",
+          "今日は小さなズレが多い。\nやることが少し遅れる。\n普通だ。\n焦るな。",
+          "今日は微妙に流れが悪い。\n頑張ると空回りする。\nほどほどでいい。",
+          "今日は調子が半端だ。\n悪くはないが良くもない。\nだいたいそんな日だ。",
+          "今日はちょっとズレている。\nやることが増えやすい。\nまあ普通だ。\n無理するな。"
+        ],
+        calm: [
+          "今日は派手な事件は起きない。\n安心。\n何も壊れていない日。",
+          "今日は普通。\n普通は強い。\n静かに終わる。\nそれでいい。",
+          "今日はだいたい平和。\n特に問題もない。\nまあ、勝ち。",
+          "今日は何も起きない。\nそれが一番いい。\n気にするな。",
+          "今日は静か。\n進展はない。\n損もない。\n完璧だ。"
+        ],
+        good: [
+          "今日は少し流れがいい。\n珍しく物事が進むかもしれない。\n期待はするな。\nでも悪くない。",
+          "今日は少し噛み合う。\nだいたいは普通だ。\nたまには進んでみろ。\nまあ無理するな。",
+          "今日は運が少し働く。\n滅多にない。\n試しにやってみてもいい。\n外れても普通だ。",
+          "今日は空回りしにくい。\n珍しい状態だ。\n少し動いてみろ。\n期待はするな。",
+          "今日は少しだけ追い風だ。\nだいたい弱い。\nでもゼロではない。\n悪くない日だ。"
+        ],
+        great: [
+          "今日は運が暴れている。\n珍しく全部噛み合うかもしれない。\n怖いくらいだ。\nまあ落ち着け。",
+          "今日は妙に流れがいい。\nだいたいこういう日は信用できない。\nでも進んでみろ。\n悪くない。",
+          "今日は珍しく全部当たるかもしれない。\n滅多にない。\n逆に戸惑うな。\n気楽にやれ。",
+          "今日は追い風が強い。\n珍しい状態だ。\n調子に乗るな。\nでも悪くない。",
+          "今日は運が働きすぎている。\nいつもは寝ているのに。\n試してみろ。\nまあ落ち着け。"
+        ],
+      },
+
+      namaken: {
+        bad: [
+          "…今日は無理。\n…動かない。\n…それ正解。",
+          "…だいたい外れる日。\n…寝る。\n…それでいい。",
+          "…やると崩れる。\n…やらない。\n…安全。",
+          "…調子悪い。\n…止まる。\n…問題ない。",
+          "…今日はダメ。\n…動くと疲れる。\n…休み。"
+        ],
+        low: [
+          "…少しズレる。\n…気にしない。\n…普通。",
+          "…今日は半端。\n…だいたい遅れる。\n…まあいい。",
+          "…少し調子悪い。\n…動くと疲れる。\n…休みながら。",
+          "…今日は微妙。\n…急がない。\n…大丈夫。",
+          "…少し外れる。\n…普通。\n…問題ない。"
+        ],
+        calm: [
+          "…今日は平和。\n…壊れない。\n…それでいい。",
+          "…普通。\n…普通は強い。\n…たぶん。",
+          "…今日は何も起きない。\n…最高。\n…寝る。",
+          "…静か。\n…落ち着く。\n…いい。",
+          "…変化なし。\n…それが安心。\n…うん。"
+        ],
+        good: [
+          "…少しいい。\n…珍しい。\n…少し動く？",
+          "…今日はズレない。\n…やるなら今。\n…無理はするな。",
+          "…流れいい。\n…試す価値ある。\n…疲れたら止まる。",
+          "…珍しく整ってる。\n…少しだけ。\n…まあ動く？",
+          "…今日はマシ。\n…動いても崩れない。\n…たぶん。"
+        ],
+        great: [
+          "…今日はかなりいい。\n…怖い。\n…少し動く。",
+          "…全部噛み合う。\n…珍しい。\n…疲れる前に止まる。",
+          "…流れ強い。\n…ほぼ奇跡。\n…ほどほどに。",
+          "…今日はズレない。\n…めったにない。\n…少し頑張る。",
+          "…全部当たる。\n…逆に不安。\n…まあ動く。"
+        ],
+      },
+
+      lion: {
+        bad: [
+          "今日は流れが乱れている。\n動くほど悪化する。\n静止を選べ。\nそれが正解だ。",
+          "今日は勝負の日ではない。\n退く判断も強さだ。\n静かにしていろ。",
+          "今日は噛み合わない。\n珍しくない。\n動かない方が安全だ。",
+          "今日は整っていない。\n無理に進むな。\n体勢を立て直せ。",
+          "今日は荒れている。\n戦うな。\n休めば戻る。"
+        ],
+        low: [
+          "今日は流れが少し乱れている。\n大事にはならない。\n慎重に進め。",
+          "今日は微妙に噛み合わない。\n珍しくない。\n焦るな。",
+          "今日は勝率が少し下がる。\n無理に動くな。\n様子を見ろ。",
+          "今日は整いきっていない。\n大きな問題ではない。\n落ち着いていろ。",
+          "今日は流れが弱い。\n動いても大丈夫だ。\nだが慎重に進め。"
+        ],
+        calm: [
+          "今日は静かだ。\n争う理由がない。\nよい日だ。",
+          "今日は特に起きない。\nそれで十分だ。\n黙って過ごせ。",
+          "今日は安定している。\n動かなくていい。\n整っている。",
+          "今日は平穏。\n無駄に動くな。\n勝てる。",
+          "今日は普通。\n普通は強い。\n騒ぐな。"
+        ],
+        good: [
+          "今日は流れが整っている。\n珍しく勝負できる。\nだが慢心するな。",
+          "今日は動いても崩れにくい。\n状態は悪くない。\n少し試せ。",
+          "今日は運が味方する。\n滅多にない。\n動く価値はある。",
+          "今日は噛み合う。\n良い日だ。\nだが騒ぐな。",
+          "今日は安定している。\n動いても問題ない。\n過信はするな。"
+        ],
+        great: [
+          "今日は流れが完全に整っている。\n滅多にない。\n動く価値はある。\n騒ぐな。",
+          "今日は勝率が高い。\nかなり珍しい。\n挑戦してもいい。\n過信はするな。",
+          "今日はすべて噛み合う。\n状態は極めて良好だ。\nだが冷静でいろ。",
+          "今日は流れを制御できる。\n珍しい日だ。\n動いても問題ない。\n慎重に進め。",
+          "今日は運が支配下にある。\n珍しい。\n勝負してもいい。\nだが慢心するな。"
+        ],
+      },
+
+      tora: {
+        bad: [
+          "今日はちょっと調子が悪そうだ。\n頑張っても裏目に出やすい。\n無理するな。\n休めば大丈夫。",
+          "今日は空回りしそうだ。\n焦らなくていい。\n今日は止まる日だ。",
+          "今日は流れが悪い。\n動くと疲れるだけだ。\nゆっくり休め。",
+          "今日はタイミングが合わない。\n珍しくない。\n今日は守りでいい。",
+          "今日は少しズレてるな。\n頑張る必要はない。\n休めば戻る。"
+        ],
+        low: [
+          "今日は少し調子がズレてるな。\n予定が狂いやすい。\n焦らなくていい。",
+          "今日はちょっと流れが悪い。\nでも大丈夫だ。\nゆっくりやれ。",
+          "今日は微妙な日だな。\n頑張りすぎるな。\n普通にやればいい。",
+          "今日は半端な調子だ。\n無理するな。\n様子を見ろ。",
+          "今日は少しタイミングがズレる。\n珍しくない。\n気にするな。"
+        ],
+        calm: [
+          "今日は平和だ。\n進めてもいいし、止まってもいい。\nどっちでも勝ち。",
+          "今日は普通。\n普通は一番強い。\n安心して過ごせ。",
+          "今日は落ち着く日だ。\n急がなくていい。\n守れ。",
+          "今日は何も起きない。\n最高だ。\n気楽にやれ。",
+          "今日は静か。\n損もしない。\nそれで十分だ。"
+        ],
+        good: [
+          "今日は少し調子いいな。\n物事が進みやすい。\nやれることはやってみろ。\n無理はするな。",
+          "今日は流れが悪くない。\n珍しいな。\n試してみてもいい。",
+          "今日は少しだけ運がいい。\nチャンスはある。\n焦らなくていい。",
+          "今日は空回りしにくい。\n動くなら今日だ。\nでも気楽にな。",
+          "今日は少し追い風だな。\n試しても大丈夫そうだ。\n失敗しても問題ない。"
+        ],
+        great: [
+          "今日は全部噛み合いそうだ。\nかなり珍しい。\n試すなら今日だ。\n焦るな。",
+          "今日は追い風が強い。\n珍しい日だ。\n挑戦してもいい。\n楽しめ。",
+          "今日は流れが完璧に近い。\n滅多にない日だ。\n動いても大丈夫だ。",
+          "今日は運がかなり味方してる。\n珍しいな。\nやりたいことをやってみろ。\nでも冷静にな。",
+          "今日はかなり調子いいな。\n物事が進みやすい。\nやれることはやってみろ。\n無理はするな。"
+        ],
+      },
+
+      kane: {
+        bad: [
+          "（異常検知）\n構造不安定。\n活動停止推奨。",
+          "（同期ズレ）\n状態不良。\n再起動待機。",
+          "（警告）\n流れ乱れ。\n操作中断。",
+          "（バランス崩壊）\n三次元歪み発生。\n静止推奨。",
+          "（異常値）\n運勢不整合。\n停止が最適。"
+        ],
+        low: [
+          "（微ズレ検知）\n三次元誤差小。\n問題なし。",
+          "（同期不完全）\n軽度遅延。\n活動可。",
+          "（軽微乱れ）\n構造微変形。\n注意推奨。",
+          "（誤差発生）\n流れ半安定。\n問題小。",
+          "（軽度異常）\n状態ズレ。\n動作可能。"
+        ],
+        calm: [
+          "（安定）\n異常なし。\n壊れない。\nよい。",
+          "（平常運転）\n変化なし。\nそれが安心。",
+          "（静穏）\nイベント未発生。\n成功。",
+          "（正常）\n三次元整合。\n問題なし。",
+          "（安定）\n流れ整合。\n待機が最適。"
+        ],
+        good: [
+          "（整列確認）\n流れ良好。\n試行可能。",
+          "（運勢上昇）\n三次元安定。\n実行推奨。",
+          "（同期成功）\n状態良。\n操作可能。",
+          "（波形正常）\n構造安定。\n実験可。",
+          "（良好判定）\n流れ整合。\n動作問題なし。"
+        ],
+        great: [
+          "（最高値確認）\n三次元安定最大。\n行動許可。",
+          "（運勢上限付近）\n構造最適化。\n実行推奨。",
+          "（完全同期）\n流れ一致。\n操作成功率上昇。",
+          "（異常良好）\n状態最適。\n実験成功率高。",
+          "（最大整列）\n波形完全一致。\n活動最適日。"
+        ],
+      },
+    };
+
+    // ========= DOM =========
+    const btnStart   = document.getElementById("btnStart");
+
+    const progressEl = document.getElementById("progress");
+    const questionEl = document.getElementById("question");
+    const charImg    = document.getElementById("charImg");
+    const answersEl  = document.getElementById("answers");
+
+    const percentBig = document.getElementById("percentBig");
+    const rankText   = document.getElementById("rankText");
+    const resultLines= document.getElementById("resultLines");
+    const resultChar = document.getElementById("resultChar");
+    const btnRetry   = document.getElementById("btnRetry");
+
+    const barMoney  = document.getElementById("barMoney");
+    const barLove   = document.getElementById("barLove");
+    const barWork   = document.getElementById("barWork");
+    const barHealth = document.getElementById("barHealth");
+
+    const valMoney  = document.getElementById("valMoney");
+    const valLove   = document.getElementById("valLove");
+    const valWork   = document.getElementById("valWork");
+    const valHealth = document.getElementById("valHealth");
+
+    // ========= モーダル =========
+    const modalBack  = document.getElementById("modalBack");
+    const btnPrev    = document.getElementById("btnPrev");
+    const btnNext    = document.getElementById("btnNext");
+    const btnChoose  = document.getElementById("btnChoose");
+    const pickImg    = document.getElementById("pickImg");
+    const pickName   = document.getElementById("pickName");
+    const pickDesc   = document.getElementById("pickDesc");
+    let pickIndex = 0;
+
+    function openModal(){
+      pickIndex = 0;
+      renderPick();
+      modalBack.classList.add("on");
+      modalBack.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      modalBack.classList.remove("on");
+      modalBack.setAttribute("aria-hidden","true");
+    }
+    function renderPick(){
+      const c = CHAR_LIST[pickIndex];
+      pickImg.src = c.img1;
+      pickImg.alt = c.name;
+      pickName.textContent = c.name;
+      pickDesc.textContent = c.desc;
+    }
+    btnPrev.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      pickIndex = (pickIndex - 1 + CHAR_LIST.length) % CHAR_LIST.length;
+      renderPick();
+    });
+    btnNext.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      pickIndex = (pickIndex + 1) % CHAR_LIST.length;
+      renderPick();
+    });
+    modalBack.addEventListener("click", (e)=>{ e.stopPropagation(); }); // 外クリックで閉じない
+
+    // ========= 画面切替 =========
+    function showTop(){
+      screenTop.style.display = "";
+      screenGame.style.display = "none";
+      screenResult.style.display = "none";
+      footerTop.style.display = "";
+    }
+    function showGame(){
+      screenTop.style.display = "none";
+      screenGame.style.display = "";
+      screenResult.style.display = "none";
+      footerTop.style.display = "none";
+    }
+    function showResult(){
+      screenTop.style.display = "none";
+      screenGame.style.display = "none";
+      screenResult.style.display = "";
+      footerTop.style.display = "none";
+    }
+
+    // ========= ゲーム状態 =========
+    let selectedChar = null;
+    let questions = [];
+    let idx = 0;
+    let results = [];
+
+    function renderQuestion(){
+      progressEl.textContent = `${idx+1} / 7`;
+      questionEl.textContent = questions[idx];
+      charImg.style.opacity = 1;
+      charImg.src = selectedChar.img1; // 質問中は静止（下だけ表示）
+    }
+
+    function waitMs(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+    async function onAnswer(){
+      // 各問：内部はランダム（運勢を固定しない方針）
+      const v = Math.floor(Math.random() * 101);
+      results.push(v);
+
+      answersEl.classList.add("locked");
+      await waitMs(220);
+      answersEl.classList.remove("locked");
+
+      idx++;
+      if(idx >= 7){
+        await finish();
+      }else{
+        renderQuestion();
+      }
+    }
+
+    answersEl.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      if(answersEl.classList.contains("locked")) return;
+      onAnswer();
+    });
+
+    // ========= %カウント =========
+    function countUpPercent(el, target, durationMs){
+      return new Promise((resolve) => {
+        const start = performance.now();
+        const to = Math.max(0, Math.min(100, Math.floor(target)));
+        function tick(now){
+          const t = Math.min(1, (now - start) / durationMs);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const v = Math.round(to * eased);
+          el.textContent = `${v}%`;
+          if(t < 1) requestAnimationFrame(tick);
+          else resolve();
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // ========= 全キャラ：静→動→静→動→静 =========
+    async function playSequence(imgEl){
+      const img1 = selectedChar.img1;
+      const img2 = selectedChar.img2 || selectedChar.img1; // 2枚無ければ同じでOK
+      const sequence = [img1, img2, img1, img2, img1];
+
+      // 少し遅れて開始（あなたの指定）
+      await waitMs(500);
+
+      for(let i=0; i<sequence.length; i++){
+        imgEl.style.opacity = 0;
+        await waitMs(150);
+        imgEl.src = sequence[i];
+        imgEl.style.opacity = 1;
+        await waitMs(350);
+      }
+    }
+
+    // ========= 詳細運（総合に寄せる） =========
+    function randNear(base, spread){
+      const v = base + Math.floor((Math.random()*2 - 1) * spread);
+      return Math.max(0, Math.min(100, v));
+    }
+    function setStat(barEl, valEl, p){
+      valEl.textContent = `${p}%`;
+      barEl.style.width = `${p}%`;
+    }
+
+    // ========= 結果文の抽選 =========
+    function pick(arr){
+      return arr[Math.floor(Math.random()*arr.length)];
+    }
+    function getCharBucket(){
+      // 安全に：未定義でもデカブサに落とす
+      return TEXTS[selectedChar?.id] ? selectedChar.id : "dekabusa";
+    }
+    function getRankLabel(overall){
+      // 50%だけ特別に「静穏運 100%」
+      if(overall === 50) return "静穏運 100%";
+      const k = getRankKey(overall);
+      if(k === "calm")  return "静穏";
+      if(k === "good")  return "好調";
+      if(k === "great") return "絶好調";
+      if(k === "low")   return "低調";
+      return "絶不調";
+    }
+    function buildResultLines(charId, overall){
+      // 50%だけ：Perfectly Average を混ぜる（他の文言と同じ扱いで“普通に”出す）
+      if(overall === 50){
+        return [
+          "Perfectly Average",
+          "今日は派手な事件は起きない。安心。",
+          "何も壊れていない日。"
+        ].join("\n");
+      }
+      const key = getRankKey(overall);
+      const bucket = TEXTS[charId];
+      const lines = bucket?.[key] || TEXTS.dekabusa[key];
+      return pick(lines);
+    }
+
+    // ========= 終了（結果表示） =========
+    async function finish(){
+      showResult();
+
+      // 結果キャラ：1体だけ
+      resultChar.style.opacity = 1;
+      resultChar.src = selectedChar.img1;
+
+      // 総合
+      const overall = Math.floor(results.reduce((a,b)=>a+b,0) / results.length);
+
+      percentBig.textContent = "0%";
+      rankText.textContent = "";
+      resultLines.textContent = "";
+
+      // 詳細運（総合に寄せて“それっぽく”）
+      const money  = randNear(overall, 18);
+      const love   = randNear(overall, 22);
+      const work   = randNear(overall, 16);
+      const health = randNear(overall, 14);
+
+      // バー初期化
+      [barMoney,barLove,barWork,barHealth].forEach(b=>b.style.width="0%");
+      [valMoney,valLove,valWork,valHealth].forEach(v=>v.textContent="0%");
+
+      // 総合%アニメ
+      await countUpPercent(percentBig, overall, 950);
+
+      // ランク表示（静穏/静穏運100%）
+      rankText.textContent = getRankLabel(overall);
+
+      // 結果文（キャラ別×ランク別）
+      const charId = getCharBucket();
+      resultLines.textContent = buildResultLines(charId, overall);
+
+      // 詳細運を少し遅れて表示（遊び）
+      await waitMs(200);
+      setStat(barMoney,  valMoney,  money);
+      await waitMs(120);
+      setStat(barLove,   valLove,   love);
+      await waitMs(120);
+      setStat(barWork,   valWork,   work);
+      await waitMs(120);
+      setStat(barHealth, valHealth, health);
+
+      // キャラのコマ送り（全キャラ）
+      await playSequence(resultChar);
+    }
+
+    // ========= STARTフロー（必ずキャラ選択） =========
+    function goStartFlow(){
+      fade.classList.add("on");
+      setTimeout(()=>{
+        fade.classList.remove("on");
+        openModal();
+      }, 220);
+    }
+    btnStart.addEventListener("click", (e)=>{ e.stopPropagation(); goStartFlow(); });
+    screenTop.addEventListener("click", ()=>{ goStartFlow(); }, { passive:true });
+
+    btnChoose.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      selectedChar = CHAR_LIST[pickIndex];
+
+      closeModal();
+
+      questions = pick7();
+      idx = 0;
+      results = [];
+
+      fade.classList.add("on");
+      setTimeout(()=>{
+        fade.classList.remove("on");
+        showGame();
+        renderQuestion();
+      }, 220);
+    });
+
+    // ========= もう一度見る =========
+    btnRetry.addEventListener("click", ()=>{
+      showTop();
+    });
+
+    // ========= 起動 =========
+    showTop();
+  </script>
+</body>
+</html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
