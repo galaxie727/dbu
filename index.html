@@ -14,7 +14,6 @@
       --muted2:#9a9a9a;
       --accent:#ffd400;
 
-      --footer-h: 92px;
       --maxw:520px;
     }
     *{ box-sizing:border-box; }
@@ -77,9 +76,8 @@
     }
 
     main{
-      padding: 18px 18px calc(var(--footer-h) + 16px);
+      padding: 18px 18px 18px;
       min-height: 560px;
-      position: relative;
       text-align:center;
       background:#fff;
     }
@@ -88,7 +86,7 @@
     .topTitle{
       margin-top: 28px;
       font-size: clamp(22px, 6vw, 30px);
-      font-weight: 500; /* 旧っぽい“真面目”寄り */
+      font-weight: 500;
       letter-spacing:.06em;
       line-height:1.55;
       white-space: pre-line;
@@ -148,47 +146,6 @@
       50%    { transform: translateY(-6px) rotate(0.2deg); }
     }
 
-    /* ====== FOOTER ====== */
-    footer{
-      border-top: 1px solid var(--line);
-      height: var(--footer-h);
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      align-items:center;
-      padding: 0 12px;
-      background:#fff;
-    }
-    button{
-      appearance:none;
-      border:1px solid var(--line);
-      background:#fafafa;
-      color:#111;
-      border-radius: 18px;
-      padding:16px 26px;
-      font-size:18px;
-      min-width:160px;
-      cursor:pointer;
-      transition: transform .12s ease, opacity .12s ease;
-    }
-    button:active{
-      transform: translateY(1px) scale(0.99);
-      background:#f2f2f2;
-    }
-    .primary{
-      border:none;
-      background:#111;
-      color:#fff;
-      border-radius: 28px;
-      min-width: 220px;
-      letter-spacing:.12em;
-    }
-    .locked button{
-      opacity:.35;
-      pointer-events:none;
-      cursor: default;
-    }
-
     /* ====== GAME ====== */
     #progress{
       font-size: 12px;
@@ -205,9 +162,45 @@
       white-space: pre-line;
       min-height: 3.2em;
     }
+
+    /* ★質問中キャラ（追加） */
+    .gameCharWrap{
+      margin: 26px auto 0;
+      width: min(260px, 70%);
+      position: relative;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+    }
+    .gameCharShadow{
+      position:absolute;
+      left:50%;
+      bottom:-14px;
+      transform: translateX(-50%);
+      width: 320px;
+      height: 140px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.10), transparent 70%);
+      filter: blur(18px);
+      opacity: .7;
+      pointer-events:none;
+      z-index:0;
+    }
+    #gameChar{
+      width: 100%;
+      height:auto;
+      display:block;
+      z-index:1;
+      transform-origin: 50% 100%;
+      animation: bob2 3.2s ease-in-out infinite;
+    }
+    @keyframes bob2{
+      0%,100%{ transform: translateY(0px); }
+      50%    { transform: translateY(-4px); }
+    }
+
     .bubble{
       display:inline-block;
-      margin: 18px auto 0;
+      margin: 14px auto 0;
       padding: 10px 14px;
       border: 1px solid rgba(0,0,0,0.10);
       background: #fff;
@@ -236,7 +229,7 @@
       font-size: 16px;
     }
     #percentBig{
-      margin-top: 64px; /* 上の空き使う */
+      margin-top: 64px;
       font-size: 68px;
       font-weight: 800;
       letter-spacing: .06em;
@@ -275,6 +268,52 @@
       user-select:none;
     }
 
+    /* ====== FOOTER ====== */
+    footer{
+      border-top: 1px solid var(--line);
+      background:#fff;
+      padding: 12px;
+    }
+
+    button{
+      appearance:none;
+      border:1px solid var(--line);
+      background:#fafafa;
+      color:#111;
+      border-radius: 18px;
+      padding:16px 12px;
+      font-size:18px;
+      cursor:pointer;
+      transition: transform .12s ease, opacity .12s ease;
+      width: 100%;
+    }
+    button:active{
+      transform: translateY(1px) scale(0.99);
+      background:#f2f2f2;
+    }
+    .primary{
+      border:none;
+      background:#111;
+      color:#fff;
+      border-radius: 28px;
+      letter-spacing:.12em;
+      width: 100%;
+      padding: 18px 12px;
+    }
+
+    /* ★質問ボタン：2×2グリッド（はみ出さない） */
+    .answerGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .locked button{
+      opacity:.35;
+      pointer-events:none;
+      cursor: default;
+    }
+
     /* ====== 仲間紹介（モーダル） ====== */
     .modalBack{
       position: fixed;
@@ -287,7 +326,6 @@
       z-index: 999;
     }
     .modalBack.on{ display:flex; }
-
     .modal{
       width: min(520px, 100%);
       background:#fff;
@@ -388,14 +426,12 @@
 
     @media (max-width: 420px){
       main{ min-height: 520px; }
-      button{ min-width: 140px; }
-      .primary{ min-width: 200px; }
       #percentBig{ font-size: 60px; }
       .heroShadow{ width: 320px; }
       #resultChar{ width: 210px; }
     }
     @media (prefers-reduced-motion: reduce){
-      #topChar, .tapHint{ animation:none!important; }
+      #topChar, #gameChar, .tapHint{ animation:none!important; }
       .fadeLayer{ transition:none; }
     }
   </style>
@@ -415,17 +451,15 @@
       </header>
 
       <main id="main">
-
         <!-- ===== TOP ===== -->
         <section id="screenTop">
           <div class="topTitle">あなたの運勢はどう？</div>
           <div class="topCopy">98%の人が
 外れたと回答</div>
-          <div class="tapHint" id="tapHint">タップして</div>
+          <div class="tapHint">タップして</div>
 
           <div class="hero">
             <div class="heroShadow"></div>
-            <!-- TOPは仮：選択後に差し替え -->
             <img id="topChar" src="dekabusa.png" alt="キャラ">
           </div>
         </section>
@@ -434,13 +468,19 @@
         <section id="screenGame" style="display:none;">
           <div id="progress">1 / 7</div>
           <div id="question">読み込み中</div>
+
+          <!-- ★質問中キャラ（追加） -->
+          <div class="gameCharWrap">
+            <div class="gameCharShadow"></div>
+            <img id="gameChar" src="dekabusa.png" alt="キャラ">
+          </div>
+
           <div id="bubble" class="bubble"></div>
 
           <div id="calcArea">
             <div id="calcText">今日の運勢を集計中…</div>
           </div>
 
-          <!-- 結果（ここだけ“コマ送り”を組み込み） -->
           <div id="resultArea">
             <div id="percentBig">0%</div>
             <div id="todayLabel">今日の運勢</div>
@@ -452,7 +492,6 @@
             <div id="tapBack">タップでトップへ</div>
           </div>
         </section>
-
       </main>
 
       <!-- ===== FOOTER ===== -->
@@ -461,17 +500,18 @@
       </footer>
 
       <footer id="footerGame" class="" style="display:none;">
-        <!-- 4択化：どれ押しても同じ結果（遊び心） -->
-        <button id="btnA" type="button">当たった</button>
-        <button id="btnB" type="button">外れた</button>
-        <button id="btnC" type="button">知らん</button>
-        <button id="btnD" type="button">気にするな</button>
+        <!-- ★2×2グリッド -->
+        <div class="answerGrid">
+          <button id="btnA" type="button">当たった</button>
+          <button id="btnB" type="button">外れた</button>
+          <button id="btnC" type="button">知らん</button>
+          <button id="btnD" type="button">気にするな</button>
+        </div>
       </footer>
-
     </div>
   </div>
 
-  <!-- ===== 仲間紹介モーダル（そのまま） ===== -->
+  <!-- ===== 仲間紹介モーダル ===== -->
   <div class="modalBack" id="modalBack" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="仲間紹介">
       <div class="modalHead">
@@ -512,21 +552,20 @@
     const footerGame = document.getElementById("footerGame");
     const fade       = document.getElementById("fade");
 
-    const topCharImg = document.getElementById("topChar");
+    const topCharImg  = document.getElementById("topChar");
+    const gameCharImg = document.getElementById("gameChar");
 
-    // ========= 仲間（画像名：必要に応じて差し替え） =========
-    // frames: 結果での“静→動→静→動→静”用（2枚だけ指定すればOK）
+    // ========= 仲間 =========
+    // ★カンえもんは frames:["kanemon_1.png","kanemon_2.png"] 固定
     const CHAR_LIST = [
       { id:"dekabusa", name:"デカブサ",   img:"dekabusa.png",   desc:"まあ…やるだけやれ。", frames:["dekabusa.png"] },
       { id:"lion",     name:"ライオン丸", img:"lionmaru.png",   desc:"……黙って見ろ。",       frames:["lionmaru.png"] },
       { id:"namaken",  name:"ナマケン",   img:"namaken.png",    desc:"…うん…まあ…",         frames:["namaken.png"] },
       { id:"tora",     name:"とらさん",   img:"torasan.png",    desc:"よし。次いくか。",     frames:["torasan.png"] },
 
-      // ★カンえもん：結果でコマ送り（指定どおり）
       { id:"kane",     name:"カンえもん", img:"kanemon_1.png",  desc:"（入ってる）三次元だ。", frames:["kanemon_1.png","kanemon_2.png"] },
     ];
 
-    // ========= キャラ一言（回答後） =========
     const LINES = {
       dekabusa: ["まあそうだな","うん","知らん","そういう日だ","気にするな","次","いいんじゃない"],
       lion: ["……","よかろう","悪くない","うむ","まあな","次だ","黙って見ろ"],
@@ -535,7 +574,7 @@
       kane: ["（入ってる）","三次元だ","普通だ","次","まあな","気にするな","うん"]
     };
 
-    // ========= 質問（全混ぜ） =========
+    // ========= 質問 =========
     const Q = {
       mind: [
         "最近ワクワクしている？","直感は信じる方？","今日は誰かに会いたい？","最近笑った？","新しいことを始めたい？",
@@ -602,7 +641,7 @@
       "絶好調": ["今日はかなり良い流れ。", "珍しい日だ。"]
     };
 
-    // ========= DOM（ゲーム） =========
+    // ========= DOM =========
     const progressEl = document.getElementById("progress");
     const questionEl = document.getElementById("question");
     const bubbleEl   = document.getElementById("bubble");
@@ -668,7 +707,7 @@
       footerGame.style.display = "";
     }
 
-    // ========= START（強制キャラ選択） =========
+    // ========= START =========
     const btnStart = document.getElementById("btnStart");
     function goStartFlow(){
       fade.classList.add("on");
@@ -678,8 +717,6 @@
       }, 220);
     }
     btnStart.addEventListener("click", (e)=>{ e.stopPropagation(); goStartFlow(); });
-
-    // TOPタップでもSTART（便利）
     screenTop.addEventListener("click", ()=>{ goStartFlow(); }, { passive:true });
 
     // ========= ゲーム本体 =========
@@ -697,9 +734,20 @@
       return pool[Math.floor(Math.random()*pool.length)];
     }
 
+    function syncGameChar(){
+      // ★質問中キャラの表示
+      if(!selectedCharObj) return;
+      gameCharImg.src = selectedCharObj.img;
+      gameCharImg.alt = selectedCharObj.name;
+    }
+
     function renderQuestion(){
       progressEl.textContent = `${idx+1} / ${TOTAL_Q}`;
       questionEl.textContent = questions[idx];
+
+      // ★質問ごとにキャラを表示（常に）
+      syncGameChar();
+
       bubbleEl.classList.remove("on");
       bubbleEl.textContent = "";
       footerGame.classList.remove("locked");
@@ -720,11 +768,9 @@
       if(locked) return;
       lockButtons();
 
-      // 各問：%は完全ランダム（非表示）
       const v = Math.floor(Math.random() * 101);
       results.push(v);
 
-      // 一言（脱力）
       bubbleEl.textContent = sayLine();
       bubbleEl.classList.add("on");
 
@@ -738,7 +784,6 @@
       }
     }
 
-    // 4択：全部同じ処理
     document.getElementById("btnA").addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
     document.getElementById("btnB").addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
     document.getElementById("btnC").addEventListener("click", (e)=>{ e.stopPropagation(); onAnswer(); });
@@ -752,6 +797,10 @@
       questionEl.textContent = "";
       bubbleEl.classList.remove("on");
       bubbleEl.textContent = "";
+
+      // 質問中キャラは結果に入るまで残してOK（そのまま表示でも良い）
+      // ここで消したければ display:none にする。今回は残す。
+
       calcArea.style.display = "block";
       resultArea.style.display = "none";
 
@@ -766,7 +815,6 @@
       rankText.textContent = "";
       resultLines.textContent = "";
 
-      // 結果キャラ：まず“静”にしてからコマ送り
       setupResultCharAndPlay();
 
       await countUpPercent(percentBig, avg, 1000);
@@ -776,7 +824,6 @@
       const lines = RESULT_LINES[rank] || ["今日はそんな日。","気にするな。"];
       resultLines.textContent = lines.join("\n");
 
-      // タップでトップへ（毎回選択したいならTOPへ戻す）
       const main = document.getElementById("main");
       const once = () => {
         main.removeEventListener("click", once);
@@ -802,8 +849,6 @@
     }
 
     // ========= 結果の“静→動→静→動→静” =========
-    // ・framesが2枚以上： [静, 動] を使ってコマ送り
-    // ・1枚だけ：そのまま表示（動かない）
     let seqTimer = null;
     function setupResultCharAndPlay(){
       if(seqTimer){ clearTimeout(seqTimer); seqTimer = null; }
@@ -812,10 +857,8 @@
       const still = frames[0];
       const move  = frames[1] || frames[0];
 
-      // サイズ感はCSS（#resultChar width:220px）で固定
       resultChar.src = still;
 
-      // 2枚あるキャラだけ“コマ送り”
       if(frames.length < 2) return;
 
       const sequence = [still, move, still, move, still];
@@ -834,27 +877,25 @@
         }, 150);
       }
 
-      // 少し遅れて開始（指定のノリ）
       seqTimer = setTimeout(playSequence, 500);
     }
 
     // ========= キャラ決定 → ゲーム開始 =========
-    btnChoose.addEventListener("click", async (e)=>{
+    btnChoose.addEventListener("click", (e)=>{
       e.stopPropagation();
       const c = CHAR_LIST[pickIndex];
       selectedCharId = c.id;
       selectedCharObj = c;
 
-      // 保存（任意）
-      localStorage.setItem("selectedCharacter", selectedCharId);
-
-      // TOPのキャラも選択キャラに合わせる
+      // TOPのキャラも反映
       topCharImg.src = c.img;
       topCharImg.alt = c.name;
 
+      // ★質問中キャラも即反映
+      syncGameChar();
+
       closeModal();
 
-      // 準備
       questions = buildSevenQuestions();
       idx = 0;
       results = [];
@@ -868,9 +909,7 @@
     });
 
     // モーダル外クリックは閉じない（強制選択）
-    modalBack.addEventListener("click", (e)=>{
-      e.stopPropagation();
-    });
+    modalBack.addEventListener("click", (e)=>{ e.stopPropagation(); });
 
     // ========= 起動 =========
     showTop();
