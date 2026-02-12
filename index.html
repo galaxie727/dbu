@@ -83,6 +83,8 @@
     main{
       padding: 18px;
       min-height: 620px;
+      overflow: auto;            /* ★スクロール管理をmainに寄せる */
+      -webkit-overflow-scrolling: touch;
     }
 
     /* ====== TOP ====== */
@@ -281,7 +283,6 @@
       padding: 0 12px;
     }
 
-    /* 複数運 */
     .stats{
       margin: 16px auto 0;
       width: min(420px, 92%);
@@ -562,7 +563,7 @@
           </div>
 
           <div class="retryWrap">
-            <button class="retryBtn" id="btnRetry" type="button">もう一度見る</button>
+            <button class="retryBtn" id="btnRetry" type="button">もう一度占う</button> <!-- ★変更 -->
           </div>
         </section>
 
@@ -618,28 +619,28 @@
     const fade         = document.getElementById("fade");
     const mainEl       = document.getElementById("main");
 
-    // ★画面切替は hidden で統一（iOSで下に残る問題を潰す）
+    // ★画面切替は hidden で統一
     function setScreen(name){
       screenTop.hidden    = name !== "top";
       screenGame.hidden   = name !== "game";
       screenResult.hidden = name !== "result";
       footerTop.hidden    = name !== "top";
 
-      // ★スクロール事故防止（「下にもう1枚」対策の決定打）
+      // ★スクロール事故防止（「下にもう1枚」対策）
       mainEl.scrollTop = 0;
       window.scrollTo(0,0);
     }
 
-    // ========= 仲間（画像名をここで管理） =========
+    // ========= 仲間 =========
     const CHAR_LIST = [
-      { id:"dekabusa", name:"デカブサ",   img1:"dekabusa_1.png",  img2:"dekabusa_2.png",             desc:"まあ…やるだけやれ。" },
-      { id:"lion",     name:"ライオン丸", img1:"lionmaru_1.png",  img2:"lionmaru_2.png",             desc:"……黙って見ろ。" },
-      { id:"namaken",  name:"ナマケン",   img1:"namaken_1.png",   img2:"namaken_2.png",             desc:"…うん…まあ…" },
-      { id:"tora",     name:"とらさん",   img1:"torasan_1.png",   img2:"torasan_2.png",             desc:"よし。次いくか。" },
-      { id:"kane",     name:"カンえもん", img1:"kanemon_1.png", img2:"kanemon_2.png",  desc:"（入ってる）三次元だ。" },
+      { id:"dekabusa", name:"デカブサ",   img1:"dekabusa_1.png",  img2:"dekabusa_2.png", desc:"まあ…やるだけやれ。" },
+      { id:"lion",     name:"ライオン丸", img1:"lionmaru_1.png",  img2:"lionmaru_2.png", desc:"……黙って見ろ。" },
+      { id:"namaken",  name:"ナマケン",   img1:"namaken_1.png",   img2:"namaken_2.png",  desc:"…うん…まあ…" },
+      { id:"tora",     name:"とらさん",   img1:"torasan_1.png",   img2:"torasan_2.png",  desc:"よし。次いくか。" },
+      { id:"kane",     name:"カンえもん", img1:"kanemon_1.png",   img2:"kanemon_2.png",  desc:"（入ってる）三次元だ。" },
     ];
 
-    // ========= 質問プール =========
+    // ========= 質問 =========
     const Q = [
       "今日は様子見したい？",
       "深く考えたくない？",
@@ -666,16 +667,15 @@
       return out;
     }
 
-    // ========= 結果ランク =========
+    // ========= 結果 =========
     function getRank(p){
       if(p <= 19) return "絶不調";
       if(p <= 39) return "低調";
-      if(p <= 59) return "静穏";   // ★表示は「静穏」側
+      if(p <= 59) return "静穏";
       if(p <= 79) return "好調";
       return "絶好調";
     }
 
-    // 「静穏運100%」と Perfectly Average は 50% のときだけ出す
     function buildLines(overall, rank){
       if(overall === 50){
         return [
@@ -758,9 +758,9 @@
       pickIndex = (pickIndex + 1) % CHAR_LIST.length;
       renderPick();
     });
-    modalBack.addEventListener("click", (e)=>{ e.stopPropagation(); }); // 外クリックで閉じない
+    modalBack.addEventListener("click", (e)=>{ e.stopPropagation(); });
 
-    // ========= ゲーム状態 =========
+    // ========= 状態 =========
     let selectedChar = null;
     let questions = [];
     let idx = 0;
@@ -770,7 +770,8 @@
       progressEl.textContent = `${idx+1} / 7`;
       questionEl.textContent = questions[idx];
       charImg.style.opacity = 1;
-      charImg.src = selectedChar.img1; // 質問中：下に静止画
+      charImg.src = selectedChar.img1;
+      mainEl.scrollTop = 0;  // ★確実に先頭
     }
 
     function waitMs(ms){ return new Promise(r=>setTimeout(r, ms)); }
@@ -797,7 +798,6 @@
       onAnswer();
     });
 
-    // ========= %カウント =========
     function countUpPercent(el, target, durationMs){
       return new Promise((resolve) => {
         const start = performance.now();
@@ -814,11 +814,12 @@
       });
     }
 
-    // ========= 全キャラ：静→動→静→動→静 =========
+    // ========= 7コマ：静→動→静→動→静→動→静 =========
     async function playSequence(imgEl){
       const img1 = selectedChar.img1;
       const img2 = selectedChar.img2 || selectedChar.img1;
-      const sequence = [img1, img2, img1, img2, img1];
+
+      const sequence = [img1, img2, img1, img2, img1, img2, img1]; // ★7コマ
 
       await waitMs(500);
       for(let i=0; i<sequence.length; i++){
@@ -826,7 +827,7 @@
         await waitMs(150);
         imgEl.src = sequence[i];
         imgEl.style.opacity = 1;
-        await waitMs(350);
+        await waitMs(300); // ★少しテンポ良く（350→300）
       }
     }
 
@@ -864,8 +865,6 @@
 
       const rank = getRank(overall);
       rankText.textContent = rank;
-
-      // ★ここで 50% だけ「静穏運100%」「Perfectly Average」等を出す
       resultLines.textContent = buildLines(overall, rank);
 
       await waitMs(200);
@@ -877,10 +876,11 @@
       await waitMs(120);
       setStat(barHealth, valHealth, health);
 
+      mainEl.scrollTop = 0; // ★結果も先頭固定
       await playSequence(resultChar);
     }
 
-    // ========= STARTフロー（必ずキャラ選択） =========
+    // ========= START =========
     function goStartFlow(){
       fade.classList.add("on");
       setTimeout(()=>{
@@ -908,7 +908,7 @@
       }, 220);
     });
 
-    // ========= もう一度見る =========
+    // ========= もう一度占う =========
     btnRetry.addEventListener("click", ()=>{
       setScreen("top");
     });
