@@ -15,10 +15,8 @@
       --accent:#ffd400;
 
       --maxw:520px;
-      --footerPad: 14px;
       --btnH: 58px;
       --safeB: env(safe-area-inset-bottom, 0px);
-      --safeT: env(safe-area-inset-top, 0px);
     }
     *{ box-sizing:border-box; }
     body{
@@ -180,7 +178,7 @@
       cursor: default;
     }
 
-    /* ====== GAME LAYOUT（キャラは下だけ） ====== */
+    /* ====== GAME ====== */
     .game{
       display:flex;
       flex-direction:column;
@@ -203,11 +201,9 @@
       min-height: 3.2em;
     }
     .spacer{
-      flex: 1 1 auto;   /* ここが“上の空き”を吸収してくれる */
+      flex: 1 1 auto;
       min-height: 18px;
     }
-
-    /* キャラ（下固定） */
     .charBottom{
       display:flex;
       justify-content:center;
@@ -221,8 +217,6 @@
       pointer-events:none;
       transition: opacity 0.15s;
     }
-
-    /* 選択肢（4択） */
     .answers{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -238,7 +232,7 @@
       min-height: 64px;
     }
 
-    /* ====== 結果 ====== */
+    /* ====== RESULT ====== */
     .result{
       display:flex;
       flex-direction:column;
@@ -247,43 +241,100 @@
       padding: 6px 0 0;
     }
     .resultHead{
-      padding-top: 12px;
+      padding-top: 10px;
     }
     .resultTitle{
-      font-size:22px;
+      font-size: 18px;
       margin: 0;
-      letter-spacing:.04em;
-    }
-    .resultSub{
-      margin-top: 18px;
-      font-size:26px;
-      line-height:1.5;
-      letter-spacing:.04em;
+      letter-spacing:.06em;
+      color:#111;
     }
     #percentBig{
-      margin-top: 24px;
-      font-size: 72px;
-      font-weight: 800;
+      margin-top: 16px;
+      font-size: 74px;
+      font-weight: 900;
       letter-spacing: .04em;
       line-height: 1;
+    }
+    .subCap{
+      margin-top: 10px;
+      color:#666;
+      letter-spacing:.12em;
+      font-size:12px;
     }
     #rankText{
       margin-top: 10px;
       font-size: 20px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing:.08em;
     }
     #resultLines{
-      margin-top: 14px;
+      margin-top: 12px;
       white-space: pre-line;
       font-size: 16px;
       line-height: 1.9;
       color:#111;
       padding: 0 12px;
     }
-    .retryWrap{
-      padding: 18px 0 8px;
+
+    /* 複数運 */
+    .stats{
+      margin: 16px auto 0;
+      width: min(420px, 92%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background:#fff;
+      text-align:left;
     }
+    .statRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 6px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .statRow:last-child{ border-bottom:none; }
+    .statName{
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing:.06em;
+      color:#111;
+      min-width: 5.5em;
+    }
+    .statRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width: 100%;
+      justify-content:flex-end;
+    }
+    .bar{
+      flex: 1 1 auto;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.08);
+      overflow:hidden;
+      max-width: 220px;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width: 0%;
+      background: #111;
+      border-radius: 999px;
+      transition: width .6s ease;
+    }
+    .statVal{
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing:.04em;
+      width: 3.2em;
+      text-align:right;
+    }
+
+    .retryWrap{ padding: 18px 0 8px; }
     .retryBtn{
       width: min(320px, 92%);
       border:none;
@@ -294,7 +345,7 @@
       min-height: 56px;
     }
 
-    /* ====== 仲間紹介モーダル ====== */
+    /* ====== Modal ====== */
     .modalBack{
       position: fixed;
       inset:0;
@@ -355,7 +406,7 @@
       background: #fff;
     }
     .charName{
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing:.08em;
       margin: 6px 0 8px;
     }
@@ -382,7 +433,6 @@
       background:#fff;
     }
 
-    /* フェード */
     .fadeLayer{
       position: fixed;
       inset: 0;
@@ -404,6 +454,7 @@
     @media (prefers-reduced-motion: reduce){
       #topImg, .tapHint{ animation:none!important; }
       .fadeLayer{ transition:none; }
+      .bar > i{ transition:none; }
     }
   </style>
 </head>
@@ -444,6 +495,7 @@
 
           <div class="spacer"></div>
 
+          <!-- 質問時：キャラは下だけ -->
           <div class="charBottom">
             <img id="charImg" src="" alt="キャラ">
           </div>
@@ -459,21 +511,52 @@
         <!-- ===== RESULT ===== -->
         <section id="screenResult" class="result" style="display:none;">
           <div class="resultHead">
-            <p class="resultTitle">あなたの運勢はどう？</p>
-            <div class="resultSub">
-              98%の人が<br>
-              外れたと回答
-            </div>
+            <!-- ★ここを占いっぽく変更 -->
+            <p class="resultTitle">今日のあなたの運勢は</p>
 
             <div id="percentBig">0%</div>
-            <div style="margin-top:10px;color:#666;letter-spacing:.12em;font-size:12px;">今日の運勢</div>
+
+            <div class="subCap">総合運</div>
             <div id="rankText"></div>
+
             <div id="resultLines"></div>
+
+            <!-- 複数運 -->
+            <div class="stats" id="statsBox" aria-label="詳細運勢">
+              <div class="statRow">
+                <div class="statName">金運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barMoney"></i></div>
+                  <div class="statVal" id="valMoney">0%</div>
+                </div>
+              </div>
+              <div class="statRow">
+                <div class="statName">恋愛運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barLove"></i></div>
+                  <div class="statVal" id="valLove">0%</div>
+                </div>
+              </div>
+              <div class="statRow">
+                <div class="statName">仕事運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barWork"></i></div>
+                  <div class="statVal" id="valWork">0%</div>
+                </div>
+              </div>
+              <div class="statRow">
+                <div class="statName">健康運</div>
+                <div class="statRight">
+                  <div class="bar"><i id="barHealth"></i></div>
+                  <div class="statVal" id="valHealth">0%</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="spacer"></div>
 
-          <!-- 結果のキャラは“1体だけ”ここ -->
+          <!-- 結果：キャラは1体だけ（下） -->
           <div class="charBottom" style="padding-bottom:0;">
             <img id="resultChar" src="" alt="キャラ（結果）" style="width:220px; height:auto; transition:opacity 0.15s;">
           </div>
@@ -516,7 +599,7 @@
 
         <div class="miniNote">
           追加キャラは、表示と文言が変わるだけです。<br>
-          やることは変わりません。
+          中身は変わりません。
         </div>
       </div>
 
@@ -535,7 +618,7 @@
     const fade         = document.getElementById("fade");
 
     // ========= 仲間（画像名をここで管理） =========
-    // ★カンえもんは kanemon_1.png / kanemon_2.png
+    // ★全員 静→動→静→動→静 をやるため、img2が無い場合は img1 を使う
     const CHAR_LIST = [
       { id:"dekabusa", name:"デカブサ",   img1:"dekabusa.png",  img2:null,             desc:"まあ…やるだけやれ。" },
       { id:"lion",     name:"ライオン丸", img1:"lionmaru.png",  img2:null,             desc:"……黙って見ろ。" },
@@ -571,7 +654,7 @@
       return out;
     }
 
-    // ========= 結果（確定） =========
+    // ========= 結果文（真面目寄り） =========
     function getRank(p){
       if(p <= 19) return "絶不調";
       if(p <= 39) return "低調";
@@ -589,7 +672,6 @@
 
     // ========= DOM =========
     const btnStart   = document.getElementById("btnStart");
-    const mainEl     = document.getElementById("main");
 
     const progressEl = document.getElementById("progress");
     const questionEl = document.getElementById("question");
@@ -601,6 +683,16 @@
     const resultLines= document.getElementById("resultLines");
     const resultChar = document.getElementById("resultChar");
     const btnRetry   = document.getElementById("btnRetry");
+
+    const barMoney  = document.getElementById("barMoney");
+    const barLove   = document.getElementById("barLove");
+    const barWork   = document.getElementById("barWork");
+    const barHealth = document.getElementById("barHealth");
+
+    const valMoney  = document.getElementById("valMoney");
+    const valLove   = document.getElementById("valLove");
+    const valWork   = document.getElementById("valWork");
+    const valHealth = document.getElementById("valHealth");
 
     // ========= モーダル =========
     const modalBack  = document.getElementById("modalBack");
@@ -671,21 +763,17 @@
     function renderQuestion(){
       progressEl.textContent = `${idx+1} / 7`;
       questionEl.textContent = questions[idx];
-
-      // 質問中は“下にキャラ1体だけ”
       charImg.style.opacity = 1;
-      charImg.src = selectedChar.img1;
+      charImg.src = selectedChar.img1; // 質問中は静止（下だけ表示）
     }
 
     function waitMs(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
-    // 4択は遊び心、結果は同じ（%はランダム加算）
     async function onAnswer(){
-      // 各問：%は完全ランダム（内部だけ）
+      // 各問：内部はランダム（今は占いの“中身”は固定しない方針）
       const v = Math.floor(Math.random() * 101);
       results.push(v);
 
-      // ちょい間を置いて次へ（連打防止）
       answersEl.classList.add("locked");
       await waitMs(220);
       answersEl.classList.remove("locked");
@@ -698,14 +786,13 @@
       }
     }
 
-    // 選択肢クリック
     answersEl.addEventListener("click", (e)=>{
       const btn = e.target.closest("button");
       if(!btn) return;
       onAnswer();
     });
 
-    // ========= 結果：%カウント → “静→動→静→動→静” =========
+    // ========= %カウント =========
     function countUpPercent(el, target, durationMs){
       return new Promise((resolve) => {
         const start = performance.now();
@@ -722,59 +809,77 @@
       });
     }
 
-    async function playSequenceOnResultChar(){
-      // カンえもんだけ 1/2 でコマ送り（指定どおり）
-      if(selectedChar.id !== "kane" || !selectedChar.img2){
-        resultChar.src = selectedChar.img1;
-        resultChar.style.opacity = 1;
-        return;
-      }
-      const sequence = [
-        selectedChar.img1,
-        selectedChar.img2,
-        selectedChar.img1,
-        selectedChar.img2,
-        selectedChar.img1
-      ];
-      let i = 0;
+    // ========= 全キャラ：静→動→静→動→静 =========
+    async function playSequence(imgEl){
+      const img1 = selectedChar.img1;
+      const img2 = selectedChar.img2 || selectedChar.img1; // 2枚無ければ同じでOK
+      const sequence = [img1, img2, img1, img2, img1];
 
-      // 少し遅れて開始（あなたのコードそのまま）
+      // 少し遅れて開始（あなたの指定）
       await waitMs(500);
 
-      while(i < sequence.length){
-        resultChar.style.opacity = 0;
+      for(let i=0; i<sequence.length; i++){
+        imgEl.style.opacity = 0;
         await waitMs(150);
-        resultChar.src = sequence[i];
-        resultChar.style.opacity = 1;
-        i++;
+        imgEl.src = sequence[i];
+        imgEl.style.opacity = 1;
         await waitMs(350);
       }
     }
 
+    function randNear(base, spread){
+      const v = base + Math.floor((Math.random()*2 - 1) * spread);
+      return Math.max(0, Math.min(100, v));
+    }
+
+    function setStat(barEl, valEl, p){
+      valEl.textContent = `${p}%`;
+      barEl.style.width = `${p}%`;
+    }
+
     async function finish(){
-      // 結果画面へ
       showResult();
 
-      // 結果キャラ：ここに1体だけ
-      resultChar.src = selectedChar.img1;
+      // 結果キャラ：1体だけ
       resultChar.style.opacity = 1;
+      resultChar.src = selectedChar.img1;
 
-      // %計算
-      const avg = Math.floor(results.reduce((a,b)=>a+b,0) / results.length);
-
+      // 総合
+      const overall = Math.floor(results.reduce((a,b)=>a+b,0) / results.length);
       percentBig.textContent = "0%";
       rankText.textContent = "";
       resultLines.textContent = "";
 
-      await countUpPercent(percentBig, avg, 950);
+      // 詳細運（総合に寄せて作ると“それっぽく”なる）
+      const money  = randNear(overall, 18);
+      const love   = randNear(overall, 22);
+      const work   = randNear(overall, 16);
+      const health = randNear(overall, 14);
 
-      const rank = getRank(avg);
+      // まずバーを初期化
+      [barMoney,barLove,barWork,barHealth].forEach(b=>b.style.width="0%");
+      [valMoney,valLove,valWork,valHealth].forEach(v=>v.textContent="0%");
+
+      // 総合%アニメ
+      await countUpPercent(percentBig, overall, 950);
+
+      const rank = getRank(overall);
       rankText.textContent = rank;
       const lines = RESULT_LINES[rank] || ["今日はそんな日。","気にするな。"];
       resultLines.textContent = lines.join("\n");
 
-      // コマ送り（カンえもんだけ）
-      await playSequenceOnResultChar();
+      // 詳細運を少し遅れて表示（ちょい遊び）
+      await waitMs(200);
+      setStat(barMoney,  valMoney,  money);
+      await waitMs(120);
+      setStat(barLove,   valLove,   love);
+      await waitMs(120);
+      setStat(barWork,   valWork,   work);
+      await waitMs(120);
+      setStat(barHealth, valHealth, health);
+
+      // キャラのコマ送り（全キャラ）
+      await playSequence(resultChar);
     }
 
     // ========= STARTフロー（必ずキャラ選択） =========
@@ -791,11 +896,9 @@
     btnChoose.addEventListener("click", async (e)=>{
       e.stopPropagation();
       selectedChar = CHAR_LIST[pickIndex];
-      localStorage.setItem("selectedCharacter", selectedChar.id);
 
       closeModal();
 
-      // 準備
       questions = pick7();
       idx = 0;
       results = [];
@@ -810,7 +913,6 @@
 
     // ========= もう一度見る =========
     btnRetry.addEventListener("click", ()=>{
-      // トップへ戻す（シンプルに）
       showTop();
     });
 
